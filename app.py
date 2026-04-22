@@ -490,7 +490,7 @@ with st.sidebar:
     st.markdown("<div style='height:1rem'></div>", unsafe_allow_html=True)
     st.caption(
         "Data: World Bank WDI · IMF WEO · IDA Replenishments 1–21\n\n"
-        "Model: Heckman two-stage selection\n\nCapstone Project · 2024–25"
+        "Model: Heckman two-stage selection\n\nCapstone Project · 2025–26\n\nIE University"
     )
 
 
