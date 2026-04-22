@@ -12,7 +12,6 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import streamlit as st
-from streamlit_option_menu import option_menu
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
