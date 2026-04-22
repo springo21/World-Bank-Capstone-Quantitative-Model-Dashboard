@@ -1,0 +1,30 @@
+{
+  "benchmark_ida_gdp_ratio": 0.0004258169379295129,
+  "donor_set": [
+    "AUS",
+    "AUT",
+    "BEL",
+    "CAN",
+    "CHE",
+    "DEU",
+    "DNK",
+    "ESP",
+    "FIN",
+    "FRA",
+    "GBR",
+    "IRL",
+    "ITA",
+    "JPN",
+    "KOR",
+    "KWT",
+    "LUX",
+    "NLD",
+    "NOR",
+    "NZL",
+    "PRT",
+    "SAU",
+    "SGP",
+    "SWE",
+    "USA"
+  ]
+}
