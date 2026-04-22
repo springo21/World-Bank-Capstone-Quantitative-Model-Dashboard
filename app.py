@@ -45,7 +45,7 @@ SEGMENT_COLORS = {
 }
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
-BASE      = Path("/Users/springodigbo/Downloads/World-Bank-Capstone-Quantitative-Model-main")
+BASE = Path(__file__).resolve().parent
 OUTPUTS   = BASE / "outputs"
 PROCESSED = BASE / "data" / "processed"
 
