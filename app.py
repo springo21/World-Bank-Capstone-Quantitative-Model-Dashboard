@@ -524,6 +524,7 @@ NAV_ITEMS = [
     ("Prospect Ranking",  "format_list_numbered"),
     ("World Map",         "public"),
     ("Model Diagnostics", "data_thresholding"),
+    ("Glossary",          "toc"),
 ]
 
 # Initialise session state for active page
@@ -592,8 +593,8 @@ if page == "Overview":
         "This dashboard presents the findings of a quantitative model assessing which "
         "countries have the capacity and readiness to contribute to IDA replenishments, "
         "and by how much they are currently under- or over-contributing relative to their "
-        "economic capacity. The model combines a Heckman two-stage selection model with a "
-        "rule-based capacity scorer to identify both the probability of donating and the "
+        "economic capacity. The model uses a Heckman two-stage selection model"
+        " to identify both the probability of donating and the "
         "expected contribution amount for every country in the sample.</p>",
         unsafe_allow_html=True,
     )
@@ -714,7 +715,7 @@ if page == "Overview":
 elif page == "Country Explorer":
     st.title("Country Explorer")
     st.markdown(
-        "<p class='subtle-note'>Drill into any country's readiness profile and compare "
+        "<p class='subtle-note'>Dive into any country's readiness profile and compare "
         "current contributions with capacity-based targets, model predictions, and "
         "structural indicators.</p>",
         unsafe_allow_html=True,
@@ -861,14 +862,33 @@ elif page == "Gap Analysis":
             orientation="h",
             marker_color=[SEGMENT_COLORS.get(str(s), COLORS["muted"]) for s in rate_df["donor_segment"]],
             hovertemplate="%{y}<br>Giving Rate: %{x:.2f}<extra></extra>",
+            showlegend=False,
         ))
+        # invisible traces just for the legend
+        for seg, col in SEGMENT_COLORS.items():
+            fig2.add_trace(go.Bar(
+                y=[None], x=[None],
+                orientation="h",
+                name=seg,
+                marker_color=col,
+                showlegend=True,
+            ))
         fig2.add_vline(x=1.0, line_dash="dash", line_color=COLORS["clay"],
-                        annotation_text="Benchmark (1.0)", annotation_position="top right")
+                       annotation_text="Benchmark (1.0)", annotation_position="top right")
         fig2.update_layout(
             xaxis_title="Giving Rate (actual / target)", yaxis_title=None,
-            margin=dict(l=160, t=40, b=20, r=20),
+            margin=dict(l=160, t=40, b=20, r=180),
         )
-        apply_dashboard_layout(fig2, height=max(400, len(rate_df) * 14))
+        apply_dashboard_layout(
+            fig2,
+            height=max(400, len(rate_df) * 14),
+            showlegend=True,
+            legend_orientation="v",
+            legend_x=1.02,
+            legend_y=1.0,
+            legend_xanchor="left",
+            legend_yanchor="top",
+        )
         st.plotly_chart(fig2, use_container_width=True)
 
     with tab3:
@@ -1119,7 +1139,6 @@ elif page == "Model Diagnostics":
         soft_card_close()
 
     with tab2:
-        soft_card_open()
         st.markdown("#### Variance Inflation Factors — Stage 2")
         st.markdown(
             "VIF > 10 indicates serious multicollinearity. "
@@ -1148,13 +1167,312 @@ elif page == "Model Diagnostics":
         soft_card_close()
 
     with tab3:
-        soft_card_open()
         diag_text = load_diagnostics()
-        if diag_text:
-            st.code(diag_text, language=None)
-        else:
+        if not diag_text:
             st.info(
-                "Diagnostics file not found at `outputs/heckman_diagnostics.txt`. "
-                "Run `main.py` to generate it."
+                "Diagnostics file not found at outputs/heckman_diagnostics.txt. "
+                "Run main.py to generate it."
             )
+        else:
+            border_color = COLORS["border"]
+            navy = COLORS["navy"]
+            green = COLORS["green"]
+            subtext = COLORS["subtext"]
+            bone = COLORS["bone"]
+
+            lines = diag_text.split("\n")
+            html_rows = []
+
+            for line in lines:
+                stripped = line.strip()
+
+                # blank line → spacer
+                if not stripped:
+                    html_rows.append("<div style='height:0.4rem'></div>")
+
+                # section divider (=== or ----)
+                elif stripped.startswith("====") or stripped.startswith("----"):
+                    html_rows.append(
+                        f"<hr style='border:none;height:1px;"
+                        f"background:{border_color};margin:0.6rem 0'>"
+                    )
+
+                # section header (all caps or starts with uppercase word followed by :)
+                elif stripped.isupper() and len(stripped) > 3:
+                    html_rows.append(
+                        f"<p style='margin:1rem 0 0.3rem;font-size:0.72rem;"
+                        f"font-weight:700;text-transform:uppercase;"
+                        f"letter-spacing:0.08em;color:{green}'>"
+                        f"{stripped}</p>"
+                    )
+
+                # key: value lines (contains ": " and short key on left)
+                elif ": " in stripped and len(stripped.split(": ")[0]) < 35:
+                    parts = stripped.split(": ", 1)
+                    html_rows.append(
+                        f"<div style='display:flex;gap:0.75rem;padding:0.25rem 0;"
+                        f"border-bottom:1px solid {border_color};align-items:baseline'>"
+                        f"<span style='font-size:0.85rem;font-weight:600;"
+                        f"color:{navy};min-width:260px;flex-shrink:0'>{parts[0]}</span>"
+                        f"<span style='font-size:0.85rem;color:{subtext}'>{parts[1]}</span>"
+                        f"</div>"
+                    )
+
+                # star/warning lines
+                elif stripped.startswith("*") or stripped.startswith("!") or stripped.startswith("NOTE"):
+                    html_rows.append(
+                        f"<p style='margin:0.3rem 0;font-size:0.83rem;"
+                        f"color:{subtext};font-style:italic'>{stripped}</p>"
+                    )
+
+                # everything else — normal body text
+                else:
+                    html_rows.append(
+                        f"<p style='margin:0.15rem 0;font-size:0.85rem;"
+                        f"color:{subtext};line-height:1.55'>{stripped}</p>"
+                    )
+
+            full_html = (
+                f"<div style='background:white;border:1px solid {border_color};"
+                f"border-radius:20px;padding:1.5rem 1.8rem;"
+                f"box-shadow:0 2px 10px rgba(10,18,42,0.04)'>"
+                + "".join(html_rows) +
+                "</div>"
+            )
+            st.markdown(full_html, unsafe_allow_html=True)
         soft_card_close()
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE 7 — GLOSSARY
+# ─────────────────────────────────────────────────────────────────────────────
+elif page == "Glossary":
+    st.title("Glossary of Terms and Formulas")
+    st.markdown(
+        "<p class='subtle-note'>Definitions and formulas for all key concepts "
+        "used in the Donor Readiness Index.</p>",
+        unsafe_allow_html=True,
+    )
+    st.divider()
+
+    from html import escape
+
+
+    def glossary_card(term, definition, formula=None, source=None):
+        # Escape text so Streamlit/HTML does not accidentally interpret it as markup
+        term = escape(term)
+        definition = escape(definition).replace("\n", "<br>")
+        formula = escape(formula).replace("\n", "<br>") if formula else None
+        source = escape(source) if source else None
+
+        extra_html = ""
+
+        if formula:
+            extra_html += (
+                f"<div style='background:{COLORS['bone']};border-radius:8px;"
+                f"padding:0.6rem 0.9rem;margin:0.5rem 0;"
+                f"font-family:monospace;font-size:0.88rem;color:{COLORS['navy']}'>"
+                f"{formula}</div>"
+            )
+
+        if source:
+            extra_html += (
+                f"<p style='margin:6px 0 0;font-size:0.75rem;color:{COLORS['muted']}'>"
+                f"Source: {source}</p>"
+            )
+
+        st.markdown(
+            f"""
+            <div style='background:white;border:1px solid {COLORS["border"]};
+                border-radius:16px;padding:1rem 1.2rem;margin-bottom:0.75rem;
+                box-shadow:0 1px 6px rgba(10,18,42,0.04)'>
+                <p style='margin:0 0 4px;font-size:1rem;font-weight:700;
+                          color:{COLORS["navy"]}'>{term}</p>
+                <p style='margin:0;font-size:0.9rem;color:{COLORS["subtext"]};
+                          line-height:1.55'>{definition}</p>
+                {extra_html}
+            </div>
+            """,
+            unsafe_allow_html=True,
+        )
+
+    # ── Section 1: Core Index Concepts ──────────────────────────────────────
+    st.markdown("### Core Index Concepts")
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    glossary_card(
+        "Donor Readiness Index (DRI)",
+        "A composite quantitative measure estimating a country's capacity and "
+        "willingness to contribute to IDA replenishments. Combines economic capacity, "
+        "fiscal space, development engagement, and strategic alignment.",
+    )
+    glossary_card(
+        "Capacity Target",
+        "The estimated contribution a country could make to IDA based on its GDP, "
+        "calibrated using the median IDA/GDP ratio observed across current donors "
+        "and adjusted for fiscal space.",
+        formula="Capacity Target = GDP × Benchmark IDA/GDP Ratio × Fiscal Modifier",
+        source="Adapted from IDA replenishment contribution methodology",
+    )
+    glossary_card(
+        "Benchmark IDA/GDP Ratio",
+        "The median ratio of IDA21 contribution to GDP across all current donor "
+        "countries. Used as the reference contribution rate against which all "
+        "countries are assessed.",
+        formula="Benchmark = median(IDA21 contribution / GDP) across current donors",
+    )
+    glossary_card(
+        "Fiscal Modifier",
+        "A multiplicative adjustment (capped at ±20%) applied to the capacity "
+        "target based on a country's fiscal balance as a share of GDP. Countries "
+        "running surpluses get a modest upward adjustment; those with deficits get "
+        "a downward adjustment.",
+        formula="Fiscal Modifier = 1 + clamp(Fiscal Balance / 100, −0.20, +0.20)",
+    )
+    glossary_card(
+        "Contribution Gap",
+        "The difference between a country's capacity target and its actual IDA21 "
+        "contribution. A positive gap means the country is giving less than its "
+        "capacity suggests it could. A negative gap means it is over-contributing "
+        "relative to its capacity.",
+        formula="Gap = Capacity Target − Actual IDA21 Contribution",
+    )
+    glossary_card(
+        "Giving Rate",
+        "Actual IDA21 contribution expressed as a fraction of the capacity target. "
+        "A rate of 1.0 means giving exactly at benchmark. Below 1.0 = "
+        "under-contributing; above 1.0 = over-contributing.",
+        formula="Giving Rate = Actual Contribution / Capacity Target",
+    )
+
+    st.divider()
+
+    # ── Section 2: Heckman Model ─────────────────────────────────────────────
+    st.markdown("### Heckman Two-Stage Selection Model")
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    glossary_card(
+        "Selection Bias",
+        "The statistical problem arising from the fact that IDA contribution data "
+        "only exists for countries that choose to donate. A naive regression on "
+        "donors alone would produce biased estimates because donors are not a "
+        "random sample of all countries.",
+        source="Heckman, J. (1979). Econometrica, 47(1), 153–161",
+    )
+    glossary_card(
+        "Stage 1 — Selection Equation (Probit)",
+        "Models the binary decision of whether a country donates in a given "
+        "replenishment round. The dependent variable is a donate dummy (1 or 0). "
+        "Produces a predicted probability of donating P(Donate) for every country.",
+        formula="P(Dᵢₜ = 1) = Φ(z′ᵢₜ γ)    where Φ = standard normal CDF",
+    )
+    glossary_card(
+        "Stage 2 — Outcome Equation (OLS + IMR)",
+        "Models the log donation amount conditional on donating. The Inverse Mills "
+        "Ratio from Stage 1 is included as a regressor to correct for selection bias. "
+        "Estimated on the donor subsample only.",
+        formula="ln(Yᵢₜ) = x′ᵢₜ β + δλᵢₜ + εᵢₜ    for Dᵢₜ = 1",
+    )
+    glossary_card(
+        "Inverse Mills Ratio (IMR / λ)",
+        "A correction term derived from the Stage 1 probit that captures the "
+        "expected value of the error in Stage 2 attributable to selection bias. "
+        "A statistically significant IMR confirms that selection bias was present "
+        "and the correction was necessary. In this model: λ̂ = −1.008, p < 0.001.",
+        formula="λᵢₜ = φ(ẑ′ᵢₜ γ̂) / Φ(ẑ′ᵢₜ γ̂)    where φ = standard normal PDF",
+    )
+    glossary_card(
+        "Duan Smearing Correction",
+        "A retransformation correction applied when converting log-donation "
+        "predictions back to dollar amounts. Prevents systematic underestimation "
+        "of the contribution by large donors.",
+        formula="Δ̂ = (1/n) Σ exp(ε̂ᵢₜ)    (mean of exponentiated residuals)",
+        source="Duan, N. (1983)",
+    )
+    glossary_card(
+        "Expected Contribution",
+        "Final model prediction combining both stages: the probability of donating "
+        "multiplied by the predicted amount and the smearing factor. For current "
+        "donors P(Donate) is set to 1.",
+        formula="E[Yᵢₜ] = P(Donate) × exp(x′ᵢₜ β̂ + δ̂λᵢₜ) × Δ̂",
+    )
+
+    st.divider()
+
+    # ── Section 3: Diagnostic Statistics ────────────────────────────────────
+    st.markdown("### Diagnostic Statistics")
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    glossary_card(
+        "Pseudo R²",
+        "A goodness-of-fit measure for the Stage 1 probit model, equivalent to R² "
+        "in OLS. Values between 0.20 and 0.40 are considered good fit for probit models.",
+        formula="Pseudo R² = 1 − (log-likelihood of full model / log-likelihood of null model)",
+    )
+    glossary_card(
+        "HC3 Robust Standard Errors",
+        "Heteroskedasticity-consistent standard errors (variant HC3) applied to "
+        "Stage 2 because the Breusch-Pagan test detected non-constant error variance "
+        "(p < 0.001). Preferred over HC1/HC2 in small to moderate samples as it "
+        "applies a stronger finite-sample correction.",
+    )
+    glossary_card(
+        "Variance Inflation Factor (VIF)",
+        "Measures multicollinearity among Stage 2 regressors. A VIF above 10 "
+        "indicates a variable is nearly collinear with others and its coefficient "
+        "estimate may be unstable. All core variables in this model are below 10.",
+        formula="VIF(Xⱼ) = 1 / (1 − R²ⱼ)    where R²ⱼ = R² from regressing Xⱼ on all other regressors",
+    )
+    glossary_card(
+        "Exclusion Restriction",
+        "Variables included in Stage 1 (selection equation) but excluded from "
+        "Stage 2 (outcome equation). Required for model identification. In this "
+        "model: UN voting alignment, peer donor pressure, DAC membership. "
+        "Validated with a likelihood ratio test (p < 0.001).",
+    )
+    glossary_card(
+        "Out-of-Sample MAE",
+        "Mean Absolute Error evaluated on a holdout set of IDA18–IDA20 observations "
+        "not used in training. Heckman MAE = 1.26 vs naive OLS MAE = 1.81 (log "
+        "donation units), a 30% improvement confirming the selection correction adds "
+        "predictive value.",
+        formula="MAE = (1/n) Σ |ln(Ŷᵢ) − ln(Yᵢ)|",
+    )
+
+    st.divider()
+
+    # ── Section 4: Country Segments ─────────────────────────────────────────
+    st.markdown("### Country Segments")
+    st.markdown("<br>", unsafe_allow_html=True)
+
+    segment_defs = [
+        ("Reliable Donor",           COLORS["navy"],
+         "Current IDA donor contributing at or above their capacity-adjusted target "
+         "(giving rate ≥ 0.80)."),
+        ("Under-Contributing Donor", COLORS["clay"],
+         "Current IDA donor contributing meaningfully below their capacity target "
+         "(giving rate < 0.80). Represents the highest near-term opportunity."),
+        ("High-Potential Prospect",  COLORS["green"],
+         "Non-donor country with model-estimated P(Donate) ≥ 0.50. Structural "
+         "characteristics suggest a high likelihood of participation if engaged."),
+        ("Emerging Prospect",        COLORS["bone"],
+         "Non-donor country with P(Donate) between 0.20 and 0.50. Capacity exists "
+         "but political or institutional barriers to participation are higher."),
+        ("Low Probability",          COLORS["muted"],
+         "Non-donor country with P(Donate) below 0.20. Structural constraints make "
+         "near-term participation unlikely without significant relationship investment."),
+    ]
+    for seg_name, seg_color, seg_desc in segment_defs:
+        text_col = "#ffffff" if seg_color not in [COLORS["bone"], COLORS["muted"]] else COLORS["text"]
+        st.markdown(
+            f"""<div style='background:white;border:1px solid {COLORS["border"]};
+                border-left:5px solid {seg_color};border-radius:16px;
+                padding:0.9rem 1.2rem;margin-bottom:0.75rem;
+                box-shadow:0 1px 6px rgba(10,18,42,0.04)'>
+                <p style='margin:0 0 4px;font-size:1rem;font-weight:700;
+                          color:{seg_color}'>{seg_name}</p>
+                <p style='margin:0;font-size:0.9rem;color:{COLORS["subtext"]};
+                          line-height:1.55'>{seg_desc}</p>
+            </div>""",
+            unsafe_allow_html=True,
+        )
