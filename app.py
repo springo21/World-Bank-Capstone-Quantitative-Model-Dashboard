@@ -16,6 +16,7 @@ import streamlit as st
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="IDA Donor Readiness Index",
+    page_icon="drilogo.png",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -534,7 +535,7 @@ if "page" not in st.session_state:
 with st.sidebar:
     st.markdown("""
         <div class="sidebar-brand">
-            <div class="sidebar-title">IDA Readiness</div>
+            <div class="sidebar-title">IDA DRI</div>
             <div class="sidebar-subtitle">Capstone Research Dashboard</div>
         </div>
     """, unsafe_allow_html=True)
@@ -554,7 +555,7 @@ with st.sidebar:
 
     st.divider()
     st.markdown(
-        "<p style='font-size:0.72rem;font-weight:700;text-transform:uppercase;"
+        "<p style='font-size:0.82rem;font-weight:700;text-transform:uppercase;"
         "letter-spacing:0.08em;color:rgba(255,255,255,0.45);margin:0 0 0.4rem 0.2rem'>"
         "Filters</p>",
         unsafe_allow_html=True,

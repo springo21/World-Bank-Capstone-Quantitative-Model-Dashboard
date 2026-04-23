@@ -142,11 +142,28 @@
       <option name="project" value="LOCAL" />
       <updated>1776935879048</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="ui/ux update">
+      <option name="closed" value="true" />
+      <created>1776939538506</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1776939538509</updated>
+    </task>
+    <task id="LOCAL-00009" summary="ui/ux update">
+      <option name="closed" value="true" />
+      <created>1776939558952</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1776939558953</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="first" />
+    <MESSAGE value="added glossary page" />
     <MESSAGE value="ui/ux update" />
     <option name="LAST_COMMIT_MESSAGE" value="ui/ux update" />
   </component>
