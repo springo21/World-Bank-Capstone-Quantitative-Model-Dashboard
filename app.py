@@ -218,6 +218,36 @@ st.markdown(f"""
         outline: none !important;
         box-shadow: none !important;
     }}
+    
+    /* ── Remove gap between nav buttons and divider only ── */
+    section[data-testid="stSidebar"] div[data-testid="stVerticalBlockBorderWrapper"]:has(.stButton) {{
+        padding-bottom: 0 !important;
+        margin-bottom: 0 !important;
+    }}
+
+    section[data-testid="stSidebar"] .stButton {{
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
+        line-height: 1 !important;
+    }}
+
+    section[data-testid="stSidebar"] hr {{
+        margin-top: 0 !important;
+        margin-bottom: 0.8rem !important;
+    }}
+    
+    /* ── Collapse gap between last nav button and divider ── */
+    section[data-testid="stSidebar"] .stButton {{
+        margin-bottom: -1rem !important;
+    }}
+
+    section[data-testid="stSidebar"] hr {{
+        margin-top: 0.5rem !important;
+        margin-bottom: 0.8rem !important;
+        position: relative;
+        top: -0.4rem;
+    }}
+
 
     /* ── Inputs ── */
     .stSelectbox > div > div,
@@ -304,6 +334,12 @@ st.markdown(f"""
         background-color: rgba(105,143,63,0.18) !important;
         border-radius: 999px !important;
     }}
+    
+    /* FIX multiselect height (only visually) */
+    div[data-testid="stMultiSelect"] div[data-baseweb="select"] > div {{
+        height: 50px !important;
+        overflow: hidden !important;
+    }}
 
     /* ── Metric cards ── */
     div[data-testid="metric-container"] {{
@@ -361,6 +397,17 @@ st.markdown(f"""
         box-shadow: none !important;
         border-color: var(--green) !important;
     }}
+    
+    /* Remove animated highlight bar under tab */
+    div[data-baseweb="tab-highlight"] {{
+        background-color: transparent ;
+    }}
+
+    /* Remove tab border element */
+    div[data-baseweb="tab-border"] {{
+        display: none ;
+    }}
+
 
     /* ── Buttons ── */
     .stButton > button,
@@ -748,7 +795,7 @@ elif page == "Country Explorer":
     ])
     st.divider()
 
-    col1, col2 = st.columns(2)
+    col1, col_spacer, col2 = st.columns([1, 0.08, 1])
     with col1:
         st.markdown("#### Contribution Profile")
         vals = {
@@ -785,11 +832,27 @@ elif page == "Country Explorer":
                                    if not pd.isna(row.get('alignment_score',np.nan)) else "—"),
             "IFC Presence":       "Yes" if row.get("ifc_presence_score", 0) > 0 else "No",
         }
-        for k, v in metrics.items():
-            a, b = st.columns([1.4, 1])
-            a.markdown(f"**{k}**")
-            b.markdown(v)
-        soft_card_close()
+        # build simple stacked text block
+        metrics_text = "<br>".join(
+            [f"<b>{k}</b>: {v}" for k, v in metrics.items()]
+        )
+
+        st.markdown(
+            f"""
+            <div style='background:white;border:1px solid {COLORS["border"]};
+        border-radius:20px;padding:1.3rem 1.5rem;
+        box-shadow:0 2px 10px rgba(10,18,42,0.04);
+        height: 300px'>
+
+        <div style='margin:0;font-size:1.2rem;
+        color:{COLORS["text"]};
+        line-height:1.6'>
+        {metrics_text}
+        </div>
+
+        </div>""",
+            unsafe_allow_html=True,
+        )
 
     st.divider()
     st.markdown("#### Gap Percentile vs. All Countries")
@@ -849,14 +912,17 @@ elif page == "Gap Analysis":
         st.caption("Navy bars = actual IDA21. Light bars = capacity-adjusted target.")
 
     with tab2:
-        st.markdown("#### Giving Rate: Actual ÷ Capacity Target")
+        st.markdown("#### Giving Rate = Actual ÷ Capacity Target")
         st.markdown(
             "A giving rate of 1.0 means contributing exactly at benchmark. "
             "<1.0 = under-contributing, >1.0 = over-contributing."
         )
+        top_n = st.slider("Show top N countries", 10, 200, 40, step=5)
+
         rate_df = (
             filtered[filtered["giving_rate"].notna() & (filtered["giving_rate"] < 15)]
             .sort_values("giving_rate", ascending=True)
+            .tail(top_n)
         )
         fig2 = go.Figure(go.Bar(
             y=rate_df["country_name"], x=rate_df["giving_rate"],
@@ -875,7 +941,7 @@ elif page == "Gap Analysis":
                 showlegend=True,
             ))
         fig2.add_vline(x=1.0, line_dash="dash", line_color=COLORS["clay"],
-                       annotation_text="Benchmark (1.0)", annotation_position="top right")
+                       annotation_text="Benchmark (1.0)", annotation_position="top right", annotation_yshift=-20)
         fig2.update_layout(
             xaxis_title="Giving Rate (actual / target)", yaxis_title=None,
             margin=dict(l=160, t=40, b=20, r=180),
@@ -916,8 +982,8 @@ elif page == "Gap Analysis":
         fig3.add_hline(y=1.0, line_dash="dash", line_color=COLORS["clay"],
                         annotation_text="Benchmark")
         fig3.add_vline(x=scatter_df["gdp_norm"].median(), line_dash="dot",
-                        line_color="grey", annotation_text="Median GDP")
-        for text, x, y in [("High priority", 0.85, 0.08), ("Overperforming", 0.85, 2.5)]:
+                        line_color="grey", annotation_text="Median GDP", annotation_position="top right", annotation_yshift=-18)
+        for text, x, y in [("High priority", 0.85, 0.08), ("Overperforming", 0.85, 6.5)]:
             fig3.add_annotation(x=x, y=y, text=f"<b>{text}</b>",
                                  showarrow=False, font=dict(size=11, color="grey"))
         apply_dashboard_layout(fig3, height=520)
@@ -939,11 +1005,20 @@ elif page == "Prospect Ranking":
 
     col1, col2 = st.columns(2)
     with col1:
+        st.markdown(
+            "<p style='margin:0 0 6px;font-size:0.85rem;font-weight:600'</p>",
+            unsafe_allow_html=True
+        )
         show_segments = st.multiselect(
-            "Filter by segment", seg_options,
+            "Segment Filter", seg_options,
             default=["High-Potential Prospect", "Emerging Prospect", "Under-Contributing Donor"],
         )
+
     with col2:
+        st.markdown(
+            "<p style='margin:0 0 6px;font-size:0.85rem;font-weight:600'</p>",
+            unsafe_allow_html=True
+        )
         # slider — full track themed via CSS
         min_p = st.slider("Minimum P(Donate)", 0.0, 1.0, 0.0, step=0.05)
 
@@ -983,10 +1058,10 @@ elif page == "Prospect Ranking":
                         file_name="ida_prospect_ranking.csv", mime="text/csv")
 
     st.divider()
-    st.markdown("#### Gap vs. P(Donate) — Engagement Priority Matrix")
+    st.markdown("#### Gap vs. P(Donate) - Engagement Priority Matrix")
     st.markdown(
         "Countries in the top-right have both a large gap and high model-estimated "
-        "probability of donating — strongest candidates for IDA engagement."
+        "probability of donating and are the strongest candidates for IDA engagement."
     )
     matrix_df = prospect_df[
         prospect_df["gap_usd"].notna() & prospect_df["p_donate"].notna()
@@ -1100,7 +1175,7 @@ elif page == "Model Diagnostics":
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("IMR p-value",            "< 0.001",   delta="Selection bias confirmed", delta_color="normal")
     col2.metric("LR Excl. Restriction",   "p < 0.001", delta="Strong instruments",       delta_color="normal")
-    col3.metric("Heckman OOS MAE",        "1.2573",    delta="vs OLS: 1.8145",           delta_color="inverse")
+    col3.metric("Heckman OOS MAE",        "1.2573",    delta="-0.56 vs OLS: 1.8145",     delta_color="inverse")
     col4.metric("BP Heteroskedasticity",  "p < 0.001", delta="HC3 robust SEs applied",   delta_color="normal")
 
     st.divider()
@@ -1142,7 +1217,7 @@ elif page == "Model Diagnostics":
     with tab2:
         st.markdown("#### Variance Inflation Factors — Stage 2")
         st.markdown(
-            "VIF > 10 indicates serious multicollinearity. "
+            "VIF > 10 indicates significant multicollinearity. "
             "All core variables are below the threshold."
         )
         vif_data = {
@@ -1175,70 +1250,173 @@ elif page == "Model Diagnostics":
                 "Run main.py to generate it."
             )
         else:
+            import re
+
             border_color = COLORS["border"]
-            navy = COLORS["navy"]
-            green = COLORS["green"]
-            subtext = COLORS["subtext"]
-            bone = COLORS["bone"]
+            navy         = COLORS["navy"]
+            green        = COLORS["green"]
+            subtext      = COLORS["subtext"]
+            text         = COLORS["text"]
+            bone         = COLORS["bone"]
+            snow         = COLORS["snow"]
+            clay         = COLORS["clay"]
 
-            lines = diag_text.split("\n")
-            html_rows = []
+            def split_columns(line):
+                return [c.strip() for c in re.split(r" {2,}", line.strip()) if c.strip()]
 
+            def is_column_subheading(line):
+                """Lines like 'Variable    Heckman  Naive OLS  % Change'
+                or 'Model    MAE    RMSE' — text-only multi-column rows."""
+                cols = split_columns(line)
+                return (
+                    len(cols) >= 3
+                    and not any(re.search(r"^-?\d+\.?\d*([%]?)$", c) for c in cols)
+                    and not re.match(r"^\d+\.", line.strip())
+                    and len(line.strip()) > 5
+                )
+
+            def is_data_row(line):
+                """Lines with 2+ columns where at least one cell is numeric."""
+                cols = split_columns(line)
+                return (
+                    len(cols) >= 2
+                    and any(re.search(r"-?\d+\.?\d*", c) for c in cols)
+                    and len(line.strip()) > 5
+                )
+
+            def is_numbered_heading(line):
+                """Lines like '1. IMR Significance Test' or '2. Exclusion Restriction...'"""
+                return bool(re.match(r"^\d+\.\s+\S", line.strip()))
+
+            def is_title(line):
+                """The main title — all caps or contains 'Heckman Selection Model'"""
+                s = line.strip()
+                return (
+                    "heckman" in s.lower() and "model" in s.lower()
+                ) or (s.isupper() and len(s) > 8)
+
+            lines     = diag_text.split("\n")
+            max_cols  = 1
             for line in lines:
+                if is_column_subheading(line) or is_data_row(line):
+                    max_cols = max(max_cols, len(split_columns(line)))
+
+            tbody_html = ""
+            i = 0
+
+            while i < len(lines):
+                line     = lines[i]
                 stripped = line.strip()
 
-                # blank line → spacer
-                if not stripped:
-                    html_rows.append("<div style='height:0.4rem'></div>")
+                # skip blank lines and raw dividers
+                if not stripped or re.match(r"^[=\-]{4,}$", stripped):
+                    i += 1
+                    continue
 
-                # section divider (=== or ----)
-                elif stripped.startswith("====") or stripped.startswith("----"):
-                    html_rows.append(
-                        f"<hr style='border:none;height:1px;"
-                        f"background:{border_color};margin:0.6rem 0'>"
+                # ── TITLE — large, navy background, white bold centred text
+                if is_title(stripped):
+                    tbody_html += (
+                        f"<tr style='background:{navy}'>"
+                        f"<td colspan='{max_cols}' style='"
+                        f"padding:0.85rem 1rem;"
+                        f"font-size:1rem;"
+                        f"font-weight:700;"
+                        f"color:white;"
+                        f"letter-spacing:-0.01em;"
+                        f"text-align:left'>"
+                        f"{stripped}</td></tr>"
                     )
+                    i += 1
+                    continue
 
-                # section header (all caps or starts with uppercase word followed by :)
-                elif stripped.isupper() and len(stripped) > 3:
-                    html_rows.append(
-                        f"<p style='margin:1rem 0 0.3rem;font-size:0.72rem;"
-                        f"font-weight:700;text-transform:uppercase;"
-                        f"letter-spacing:0.08em;color:{green}'>"
-                        f"{stripped}</p>"
+                # ── NUMBERED HEADING — green left border, semibold, bone background
+                if is_numbered_heading(stripped):
+                    tbody_html += (
+                        f"<tr style='background:{bone}'>"
+                        f"<td colspan='{max_cols}' style='"
+                        f"padding:0.6rem 1rem;"
+                        f"font-size:0.88rem;"
+                        f"font-weight:700;"
+                        f"color:{navy};"
+                        f"border-top:2px solid {border_color};"
+                        f"border-bottom:1px solid {clay};"
+                        f"border-left:4px solid {border_color}'>"
+                        f"{stripped}</td></tr>"
                     )
+                    i += 1
+                    continue
 
-                # key: value lines (contains ": " and short key on left)
-                elif ": " in stripped and len(stripped.split(": ")[0]) < 35:
-                    parts = stripped.split(": ", 1)
-                    html_rows.append(
-                        f"<div style='display:flex;gap:0.75rem;padding:0.25rem 0;"
-                        f"border-bottom:1px solid {border_color};align-items:baseline'>"
-                        f"<span style='font-size:0.85rem;font-weight:600;"
-                        f"color:{navy};min-width:260px;flex-shrink:0'>{parts[0]}</span>"
-                        f"<span style='font-size:0.85rem;color:{subtext}'>{parts[1]}</span>"
-                        f"</div>"
-                    )
+                # ── COLUMN SUBHEADING — light bone, uppercase small labels
+                if is_column_subheading(line):
+                    cells    = split_columns(line)
+                    td_cells = ""
+                    for cell in cells:
+                        td_cells += (
+                            f"<td style='"
+                            f"padding:0.42rem 1rem;"
+                            f"font-size:0.75rem;"
+                            f"font-weight:700;"
+                            f"text-transform:uppercase;"
+                            f"letter-spacing:0.05em;"
+                            f"color:{navy};"
+                            f"background:{bone};"
+                            f"border-bottom:2px solid {border_color}'>"
+                            f"{cell}</td>"
+                        )
+                    for _ in range(max_cols - len(cells)):
+                        td_cells += (
+                            f"<td style='background:{bone};"
+                            f"border-bottom:2px solid {border_color}'></td>"
+                        )
+                    tbody_html += f"<tr>{td_cells}</tr>"
+                    i += 1
+                    continue
 
-                # star/warning lines
-                elif stripped.startswith("*") or stripped.startswith("!") or stripped.startswith("NOTE"):
-                    html_rows.append(
-                        f"<p style='margin:0.3rem 0;font-size:0.83rem;"
-                        f"color:{subtext};font-style:italic'>{stripped}</p>"
-                    )
+                # ── DATA ROW — white background, grey text, alternating handled below
+                if is_data_row(line):
+                    cells    = split_columns(line)
+                    td_cells = ""
+                    for ci, cell in enumerate(cells):
+                        fw = "400" if ci == 0 else "400"
+                        tc = navy if ci == 0 else navy
+                        td_cells += (
+                            f"<td style='"
+                            f"padding:0.4rem 1rem;"
+                            f"font-size:0.83rem;"
+                            f"font-weight:{fw};"
+                            f"color:{tc};"
+                            f"border-bottom:1px solid {border_color}'>"
+                            f"{cell}</td>"
+                        )
+                    for _ in range(max_cols - len(cells)):
+                        td_cells += (
+                            f"<td style='border-bottom:1px solid {border_color}'></td>"
+                        )
+                    tbody_html += f"<tr style='background:white'>{td_cells}</tr>"
+                    i += 1
+                    continue
 
-                # everything else — normal body text
-                else:
-                    html_rows.append(
-                        f"<p style='margin:0.15rem 0;font-size:0.85rem;"
-                        f"color:{subtext};line-height:1.55'>{stripped}</p>"
-                    )
+                # ── NORMAL TEXT — full width, grey, readable body size
+                tbody_html += (
+                    f"<tr style='background:white'>"
+                    f"<td colspan='{max_cols}' style='"
+                    f"padding:0.38rem 1rem;"
+                    f"font-size:0.83rem;"
+                    f"color:{navy};"
+                    f"line-height:1.6;"
+                    f"border-bottom:1px solid {border_color}'>"
+                    f"{stripped}</td></tr>"
+                )
+                i += 1
 
             full_html = (
-                f"<div style='background:white;border:1px solid {border_color};"
-                f"border-radius:20px;padding:1.5rem 1.8rem;"
+                f"<div style='overflow-x:auto;border-radius:20px;"
+                f"border:1px solid {border_color};"
                 f"box-shadow:0 2px 10px rgba(10,18,42,0.04)'>"
-                + "".join(html_rows) +
-                "</div>"
+                f"<table style='width:100%;border-collapse:collapse;"
+                f"font-family:Inter,Arial,sans-serif'>"
+                f"<tbody>{tbody_html}</tbody>"
+                f"</table></div>"
             )
             st.markdown(full_html, unsafe_allow_html=True)
         soft_card_close()
@@ -1324,9 +1502,9 @@ elif page == "Glossary":
     )
     glossary_card(
         "Fiscal Modifier",
-        "A multiplicative adjustment (capped at ±20%) applied to the capacity "
+        "An adjustment (capped at ±20%) applied to the capacity "
         "target based on a country's fiscal balance as a share of GDP. Countries "
-        "running surpluses get a modest upward adjustment; those with deficits get "
+        "running surpluses get an upward adjustment; those with deficits get "
         "a downward adjustment.",
         formula="Fiscal Modifier = 1 + clamp(Fiscal Balance / 100, −0.20, +0.20)",
     )
