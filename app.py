@@ -168,44 +168,54 @@ st.markdown(f"""
         color: rgba(255,255,255,0.65);
     }}
 
-    /* ── Nav items — hide radio dots, style as rows with dividers ── */
-    div[role="radiogroup"] {{
-        gap: 0 !important;
-    }}
-
-    div[role="radiogroup"] > label {{
-        width: 100% !important;              /* force full width */
-        display: flex !important;
-        align-items: center !important;
+    /* ── Sidebar nav buttons (Material icon style) ── */
+    /* tertiary (inactive) nav buttons — transparent, white text */
+    section[data-testid="stSidebar"] .stButton > button[kind="tertiary"] {{
         background: transparent !important;
+        color: rgba(255,255,255,0.80) !important;
         border: none !important;
-        border-bottom: 1px solid rgba(255,255,255,0.10) !important;
+        border-bottom: 1px solid rgba(255,255,255,0.08) !important;
         border-radius: 0 !important;
-        padding: 0.75rem 0.5rem !important;
-        margin: 0 !important;
-        gap: 0.6rem !important;
-        transition: background 0.15s;
-        cursor: pointer;
+        padding: 0.7rem 0.75rem !important;
+        text-align: left !important;
+        font-weight: 500 !important;
+        font-size: 0.95rem !important;
+        justify-content: flex-start !important;
+        box-shadow: none !important;
     }}
 
-    div[role="radiogroup"] > label:first-child {{
-        border-top: 1px solid rgba(255,255,255,0.10) !important;
-    }}
-
-    div[role="radiogroup"] > label:hover {{
+    section[data-testid="stSidebar"] .stButton > button[kind="tertiary"]:hover {{
         background: rgba(255,255,255,0.07) !important;
+        color: white !important;
     }}
 
-    /* hide the radio circle dot */
-    div[role="radiogroup"] > label > div:first-child {{
-        display: none !important;
+    /* primary (active) nav button — green highlight */
+    section[data-testid="stSidebar"] .stButton > button[kind="primary"] {{
+        background: rgba(105,143,63,0.30) !important;
+        color: white !important;
+        border: none !important;
+        border-left: 3px solid {COLORS["green"]} !important;
+        border-radius: 0 !important;
+        padding: 0.7rem 0.75rem !important;
+        text-align: left !important;
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+        justify-content: flex-start !important;
+        box-shadow: none !important;
     }}
 
-    div[role="radiogroup"] label p {{
-        font-weight: 500;
-        font-size: 0.95rem;
-        color: rgba(255,255,255,0.88) !important;
-        margin: 0 !important;
+    /* nav button icons */
+    section[data-testid="stSidebar"] .stButton > button svg,
+    section[data-testid="stSidebar"] .stButton > button [data-testid="stIconMaterial"] {{
+        color: rgba(255,255,255,0.85) !important;
+        fill: rgba(255,255,255,0.85) !important;
+    }}
+
+    /* remove focus ring on nav buttons */
+    section[data-testid="stSidebar"] .stButton > button:focus,
+    section[data-testid="stSidebar"] .stButton > button:focus-visible {{
+        outline: none !important;
+        box-shadow: none !important;
     }}
 
     /* ── Inputs ── */
@@ -224,6 +234,40 @@ st.markdown(f"""
         background-color: var(--navy) !important;
         border: 1px solid rgba(255,255,255,0.15) !important;
         border-radius: 12px !important;
+    }}
+        /* ── Selectbox dropdown menu ── */
+    div[data-baseweb="popover"] ul {{
+        background-color: var(--snow) !important;
+        border: 1px solid rgba(255,255,255,0.15) !important;
+        border-radius: 12px !important;
+    }}
+    
+    div[data-baseweb="popover"] ul li {{
+        background-color: transparent !important;
+        color: white !important;
+    }}
+    
+    div[data-baseweb="popover"] ul li:hover {{
+        background-color: rgba(255,255,255,0.10) !important;
+    }}
+    
+    /* selected option highlight */
+    div[data-baseweb="popover"] ul li[aria-selected="true"] {{
+        background-color: rgba(128, 78, 73, 0.35) !important;
+        color: white !important;
+    }}
+    
+    /* the input box itself */
+    div[data-testid="stSelectbox"] > div > div {{
+        background-color: white !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 14px !important;
+        color: var(--text) !important;
+    }}
+    
+    /* text inside the selectbox */
+    div[data-testid="stSelectbox"] > div > div > div {{
+        color: var(--text) !important;
     }}
 
     ul[data-baseweb="menu"] li {{
@@ -421,29 +465,70 @@ def soft_card_close():
 
 
 # ── KPI row ───────────────────────────────────────────────────────────────────
-def kpi_row(metrics: list[tuple]):
-    """metrics = list of (label, value, delta, delta_label)"""
+def kpi_row(metrics: list[tuple], colors: list[str] | None = None):
+    """
+    metrics = list of (label, value, delta, delta_label)
+    colors  = optional list of hex background colors, one per metric.
+              Defaults to cycling through the brand palette.
+    """
+    default_colors = [
+        COLORS["navy"],
+        COLORS["green"],
+        COLORS["clay"],
+        COLORS["bone"],
+        COLORS["muted"],
+    ]
+    if colors is None:
+        colors = (default_colors * len(metrics))[:len(metrics)]
+
     cols = st.columns(len(metrics))
-    for col, (label, value, delta, delta_label) in zip(cols, metrics):
+    for col, (label, value, delta, delta_label), bg in zip(cols, metrics, colors):
+        # pick text colour — white on dark backgrounds, dark on light ones
+        text_col = "#ffffff" if bg not in [COLORS["bone"], "#c9c2b5", COLORS["muted"]] else COLORS["text"]
+        sub_col  = "rgba(255,255,255,0.65)" if text_col == "#ffffff" else COLORS["subtext"]
+        delta_html = ""
+        if delta:
+            delta_html = f"<p style='margin:4px 0 0;font-size:0.78rem;color:{sub_col}'>{delta}</p>"
         with col:
-            st.metric(
-                label=label, value=value, delta=delta,
-                delta_color="normal" if delta_label != "inverse" else "inverse",
+            st.markdown(
+                f"""
+                <div style='
+                    background: {bg};
+                    border-radius: 18px;
+                    padding: 1.1rem 1.2rem;
+                    box-shadow: 0 2px 10px rgba(10,18,42,0.08);
+                    height: 110px;
+                '>
+                    <p style='margin:0 0 4px;font-size:0.8rem;font-weight:700;
+                              text-transform:uppercase;letter-spacing:0.06em;
+                              color:{sub_col}'>{label}</p>
+                    <p style='margin:0;font-size:1.9rem;font-weight:700;
+                              color:{text_col};line-height:1.1'>{value}</p>
+                    {delta_html}
+                </div>
+                """,
+                unsafe_allow_html=True,
             )
 
 
 # ─────────────────────────────────────────────────────────────────────────────
-# SIDEBAR  — icon nav with dividers, no radio dots
+# SIDEBAR — Material icon nav using st.button with :material/icon_name:
+# Docs: https://docs.streamlit.io/develop/api-reference/widgets/st.button
+# Icons: https://fonts.google.com/icons?icon.set=Material+Symbols
 # ─────────────────────────────────────────────────────────────────────────────
-# Unicode icons that correspond to each page (no emojis, just plain chars/symbols)
-NAV_ICONS = {
-    "Overview":          "◈",   # summary / grid
-    "Country Explorer":  "◎",   # magnify / target
-    "Gap Analysis":      "▦",   # chart
-    "Prospect Ranking":  "◉",   # ranked list
-    "World Map":         "⊕",   # globe-like
-    "Model Diagnostics": "≡",   # settings / stats
-}
+
+NAV_ITEMS = [
+    ("Overview",          "dashboard"),
+    ("Country Explorer",  "explore"),
+    ("Gap Analysis",      "bar_chart"),
+    ("Prospect Ranking",  "format_list_numbered"),
+    ("World Map",         "public"),
+    ("Model Diagnostics", "data_thresholding"),
+]
+
+# Initialise session state for active page
+if "page" not in st.session_state:
+    st.session_state.page = "Overview"
 
 with st.sidebar:
     st.markdown("""
@@ -453,19 +538,20 @@ with st.sidebar:
         </div>
     """, unsafe_allow_html=True)
 
-    # Build nav labels with icon prefix
-    nav_pages = list(NAV_ICONS.keys())
-    nav_labels = [f"{NAV_ICONS[p]}  {p}" for p in nav_pages]
+    # One button per page — active page styled as primary, others tertiary
+    for label, icon_name in NAV_ITEMS:
+        is_active = st.session_state.page == label
+        if st.button(
+            label,
+            icon=f":material/{icon_name}:",
+            type="primary" if is_active else "tertiary",
+            use_container_width=True,
+            key=f"nav_{label.lower().replace(' ', '_')}",
+        ):
+            st.session_state.page = label
+            st.rerun()
 
-    selected_label = st.radio(
-        "Navigation",
-        nav_labels,
-        label_visibility="collapsed",
-    )
-    # Resolve back to clean page name
-    page = selected_label.split("  ", 1)[1]
-
-    st.markdown("<div style='height:0.8rem'></div>", unsafe_allow_html=True)
+    st.divider()
     st.markdown(
         "<p style='font-size:0.72rem;font-weight:700;text-transform:uppercase;"
         "letter-spacing:0.08em;color:rgba(255,255,255,0.45);margin:0 0 0.4rem 0.2rem'>"
@@ -492,6 +578,8 @@ with st.sidebar:
         "Data: World Bank WDI · IMF WEO · IDA Replenishments 1–21\n\n"
         "Model: Heckman two-stage selection\n\nCapstone Project · 2025–26\n\nIE University"
     )
+
+page = st.session_state.page
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -908,7 +996,7 @@ elif page == "World Map":
         "<p class='subtle-note'>"
         "<strong>Dark clay</strong> = large positive gap (under-contributing). &nbsp;"
         "<strong>Deep navy</strong> = over-contributing relative to capacity. &nbsp;"
-        "<strong>Snow</strong> = contributing at benchmark.</p>",
+        "<strong>White</strong> = contributing at benchmark.</p>",
         unsafe_allow_html=True,
     )
     st.divider()
@@ -964,7 +1052,6 @@ elif page == "World Map":
     st.plotly_chart(fig_map, use_container_width=True)
 
     st.divider()
-    soft_card_open()
     st.markdown("#### Map Data Table")
     tbl_map = map_df[["country_name", "donor_segment", "_gap_fmt",
                        "_rate_fmt", "_actual_fmt", "_target_fmt"]].copy()
