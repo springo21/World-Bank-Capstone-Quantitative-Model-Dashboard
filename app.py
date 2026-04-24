@@ -637,7 +637,7 @@ page = st.session_state.page
 if page == "Overview":
     st.title("IDA Sovereign Donor Readiness Index")
     st.markdown(
-        "<p class='subtle-note' style='max-width:900px;line-height:1.6'>"
+        "<p class='subtle-note' style='line-height:1.6'>"
         "This dashboard presents the findings of a quantitative model assessing which "
         "countries have the capacity and readiness to contribute to IDA replenishments, "
         "and by how much they are currently under- or over-contributing relative to their "
