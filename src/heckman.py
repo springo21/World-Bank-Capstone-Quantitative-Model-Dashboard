@@ -61,7 +61,8 @@ PANEL_REQUIRED_COLUMNS = {
     "log_gdp_per_capita", "dac_member", "un_voting_align", "trade_openness",
     "gov_effectiveness", "peer_donor", "log_gdp_level", "fiscal_balance_pct_gdp",
     "ida_vote_share_lag", "trade_exposure_ida", "log_donation_lag",
-    "us_eu_ally", "sovereign_credit_rating",
+    "us_eu_ally",
+# "sovereign_credit_rating",  # dropped: static hand-curated proxy, collinear with GDP/governance
 }
 
 STAGE1_VARS = [
@@ -72,12 +73,13 @@ STAGE1_VARS = [
 STAGE2_VARS = [
     "log_gdp_level", "fiscal_balance_pct_gdp", "ida_vote_share_lag",
     "trade_exposure_ida", "log_donation_lag", "us_eu_ally",
-    "sovereign_credit_rating",
+    # "sovereign_credit_rating", #dropped
 ]
 
 STAGE2_CONTINUOUS = [
     "log_gdp_level", "fiscal_balance_pct_gdp", "ida_vote_share_lag",
-    "trade_exposure_ida", "log_donation_lag", "sovereign_credit_rating",
+    "trade_exposure_ida", "log_donation_lag",
+    # "sovereign_credit_rating",
 ]
 
 CREDIT_RATING_MAP = {
@@ -124,13 +126,13 @@ def load_panel() -> pd.DataFrame:
 # Preprocessing
 # ---------------------------------------------------------------------------
 
-def _encode_credit_ratings(panel: pd.DataFrame) -> pd.DataFrame:
-    """Convert sovereign_credit_rating strings to ordinal integers."""
-    if panel["sovereign_credit_rating"].dtype == object:
-        panel["sovereign_credit_rating"] = panel["sovereign_credit_rating"].map(
-            CREDIT_RATING_MAP
-        )
-    return panel
+#def _encode_credit_ratings(panel: pd.DataFrame) -> pd.DataFrame:
+#    """Convert sovereign_credit_rating strings to ordinal integers."""
+#    if panel["sovereign_credit_rating"].dtype == object:
+#        panel["sovereign_credit_rating"] = panel["sovereign_credit_rating"].map(
+#            CREDIT_RATING_MAP
+#        )
+#    return panel
 
 
 def preprocess_panel(panel: pd.DataFrame) -> pd.DataFrame:
@@ -146,7 +148,7 @@ def preprocess_panel(panel: pd.DataFrame) -> pd.DataFrame:
         )
 
     # Credit rating encoding
-    panel = _encode_credit_ratings(panel)
+    # panel = _encode_credit_ratings(panel)
 
     # log_donation_lag: set to 0 for first-time donors / non-donors with no prior record
     panel["log_donation_lag"] = panel["log_donation_lag"].fillna(0.0)
@@ -407,7 +409,11 @@ def predict_all(
 # ---------------------------------------------------------------------------
 
 def assign_segments(df: pd.DataFrame) -> pd.DataFrame:
-    """Assign donor_segment labels based on p_donate and gap."""
+    """
+    Assign donor_segment labels based on giving_rate_raw, p_donate, and donor status.
+
+    'Exceeded Target' takes precedence for countries with giving_rate_raw > 1.0.
+    """
     df = df.copy()
     segments = []
     for _, row in df.iterrows():
@@ -415,8 +421,12 @@ def assign_segments(df: pd.DataFrame) -> pd.DataFrame:
         expected = row.get("expected_contribution", None)
         actual = row.get("actual_contribution_usd", 0.0) or 0.0
         p = row.get("p_donate", 0.0) or 0.0
+        giving_rate_raw = row.get("giving_rate_raw", None)
 
-        if is_donor and expected and expected > 0:
+        # Over-contributors: check raw rate first (before any capping)
+        if giving_rate_raw is not None and not np.isnan(giving_rate_raw) and giving_rate_raw > 1.0:
+            segments.append("Exceeded Target")
+        elif is_donor and expected and expected > 0:
             gap_pct = (expected - actual) / expected
             if gap_pct > 0.20:
                 segments.append("Under-Contributing Donor")
@@ -1042,14 +1052,9 @@ def generate_regression_table(
 # Public interface
 # ---------------------------------------------------------------------------
 
-def score_capacity(
-    master: pd.DataFrame | None = None,
-    fiscal_modifier: bool = True,
-) -> pd.DataFrame:
+def score_capacity(master: pd.DataFrame | None = None) -> pd.DataFrame:
     """
     Compute Heckman-based capacity scores for all countries.
-
-    Signature-compatible replacement for capacity.score_capacity().
 
     Parameters
     ----------
@@ -1057,8 +1062,6 @@ def score_capacity(
         Per-country snapshot from ingest.build_master(). Used to join
         country metadata (iso3, country_name, income_group, gdp_usd, actuals).
         If None, loads from data/processed/master.csv.
-    fiscal_modifier : bool
-        Accepted for interface compatibility; not used in Heckman estimation.
 
     Returns
     -------
@@ -1117,14 +1120,15 @@ def score_capacity(
 
     # Pull in per-country metadata from the same lookup tables used in build_panel.py
     from build_panel import (
-        DAC_JOIN_YEAR, US_EU_ALLY, UN_VOTING_ALIGN,
-        IDA_VOTE_SHARE, TRADE_EXPOSURE_IDA, SOVEREIGN_RATING,
+        DAC_JOIN_YEAR, US_EU_ALLY, lookup_un_align,
+        IDA_VOTE_SHARE, TRADE_EXPOSURE_IDA,
+        #SOVEREIGN_RATING,
     )
 
     iso = pred_input["iso3"]
     pred_input["dac_member"] = iso.map(lambda x: 1 if DAC_JOIN_YEAR.get(x, 9999) <= 2024 else 0)
     pred_input["us_eu_ally"] = iso.map(lambda x: US_EU_ALLY.get(x, 0))
-    pred_input["un_voting_align"] = iso.map(lambda x: UN_VOTING_ALIGN.get(x, 0.45))
+    pred_input["un_voting_align"] = iso.map(lambda x: lookup_un_align(x, 2024))
     pred_input["ida_vote_share_lag"] = iso.map(lambda x: IDA_VOTE_SHARE.get(x, 0.05))
     pred_input["trade_exposure_ida"] = iso.map(lambda x: TRADE_EXPOSURE_IDA.get(x, 0.15))
     # At IDA21, virtually all established peers are contributing — strong peer signal
@@ -1148,11 +1152,11 @@ def score_capacity(
     )
 
     # sovereign_credit_rating: encode from string ratings via CREDIT_RATING_MAP
-    pred_input["sovereign_credit_rating"] = (
-        iso.map(lambda x: SOVEREIGN_RATING.get(x, "BBB"))
-           .map(CREDIT_RATING_MAP)
-           .fillna(12)  # BBB default
-    )
+    #pred_input["sovereign_credit_rating"] = (
+    #    iso.map(lambda x: SOVEREIGN_RATING.get(x, "BBB"))
+    #       .map(CREDIT_RATING_MAP)
+    #       .fillna(12)  # BBB default
+    #)
 
     # Round column: IDA21 (no training round dummies will fire)
     pred_input["replenishment_round"] = "IDA21"
@@ -1172,10 +1176,16 @@ def score_capacity(
     )
 
     # ── 9. Merge predictions back onto master metadata + actuals ──────────
-    master_slim = master[[
+    slim_cols = [
         "iso3", "country_name", "income_group", "gdp_usd",
         "ida21_contribution_usd", "ida20_contribution_usd", "is_current_donor",
-    ]].copy()
+    ]
+
+    # Include PPP and peer_group columns when present in master
+    for _extra in ("gdp_ppp", "ppp_data_available", "peer_group"):
+        if _extra in master.columns:
+            slim_cols.append(_extra)
+    master_slim = master[slim_cols].copy()
 
     # Actual contribution: prefer IDA21, fall back to IDA20
     master_slim["actual_contribution_usd"] = (
@@ -1245,14 +1255,42 @@ def score_capacity(
     merged["expected_contribution"] = merged.apply(_expected, axis=1)
 
     # ── 11. Assign segments and map columns ────────────────────────────────
-    merged = assign_segments(merged)
     merged["adjusted_target_usd"] = merged["expected_contribution"]
-    merged["gap_usd"] = merged["expected_contribution"] - merged["actual_contribution_usd"]
-    merged["giving_rate"] = np.where(
+    merged["gap_usd_signed"] = (
+            merged["expected_contribution"] - merged["actual_contribution_usd"]
+    )
+
+    # giving_rate_raw: uncapped ratio; giving_rate: capped at 1.0 for segment logic
+    merged["giving_rate_raw"] = np.where(
         merged["expected_contribution"].notna() & (merged["expected_contribution"] > 0),
         merged["actual_contribution_usd"] / merged["expected_contribution"],
         np.nan,
     )
+    merged["giving_rate"] = merged["giving_rate_raw"].clip(upper=1.0)
+
+    # PPP gap percentage
+    if "gdp_ppp" in merged.columns and "ppp_data_available" in merged.columns:
+        merged["gap_pct_ppp_gdp"] = np.where(
+            merged["ppp_data_available"].astype(bool) & merged["gdp_ppp"].notna() & (merged["gdp_ppp"] > 0),
+            merged["gap_usd_signed"] / merged["gdp_ppp"] * 100.0,
+            np.nan,
+        )
+    else:
+        merged["gap_pct_ppp_gdp"] = np.nan
+
+    # 90% CI on gap_usd_signed from Stage 2 residual standard deviation
+    try:
+        se_predicted = float(np.sqrt(stage2_result.mse_resid))
+        gdp_for_ci = merged["gdp_usd"].fillna(0)
+        merged["gap_usd_lower"] = merged["gap_usd_signed"] - 1.645 * se_predicted * gdp_for_ci
+        merged["gap_usd_upper"] = merged["gap_usd_signed"] + 1.645 * se_predicted * gdp_for_ci
+        logger.info("Gap CI computed using se_predicted=%.4f (Stage 2 residual SD)", se_predicted)
+    except Exception as exc:
+        logger.warning("Could not compute gap CI from Stage 2 result: %s — setting to NaN", exc)
+        merged["gap_usd_lower"] = np.nan
+        merged["gap_usd_upper"] = np.nan
+
+    merged = assign_segments(merged)
 
     # ── 11. Log segmentation summary ───────────────────────────────────────
     for seg, grp in merged.groupby("donor_segment"):
@@ -1289,13 +1327,17 @@ def score_capacity(
 
     # ── 13. Write output ───────────────────────────────────────────────────
     output_cols = [
-        "iso3", "country_name", "income_group", "gdp_usd",
-        "actual_contribution_usd", "adjusted_target_usd", "gap_usd", "giving_rate",
+        "iso3", "country_name", "income_group", "peer_group",
+        "ppp_data_available", "gdp_usd", "gdp_ppp",
+        "actual_contribution_usd", "adjusted_target_usd",
+        "gap_usd_signed", "gap_pct_ppp_gdp",
+        "gap_usd_lower", "gap_usd_upper",
+        "giving_rate_raw", "giving_rate",
         "p_donate", "pred_donation_usd", "expected_contribution",
         "donor_segment", "imr",
     ]
     output_cols = [c for c in output_cols if c in merged.columns]
-    scores = merged[output_cols].sort_values("gap_usd", ascending=False, na_position="last")
+    scores = merged[output_cols].sort_values("gap_usd_signed", ascending=False, na_position="last")
     scores = scores.reset_index(drop=True)
 
     scores.to_csv(CAPACITY_SCORES_PATH, index=False)
@@ -1303,6 +1345,6 @@ def score_capacity(
         "Heckman capacity scores written to %s (%d countries, %d with valid gap)",
         CAPACITY_SCORES_PATH,
         len(scores),
-        scores["gap_usd"].notna().sum(),
+        scores["gap_usd_signed"].notna().sum(),
     )
     return scores

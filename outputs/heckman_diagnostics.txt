@@ -4,25 +4,24 @@ HECKMAN SELECTION MODEL — DIAGNOSTICS REPORT
 
 1. IMR Significance Test
 ----------------------------------------
-   IMR coefficient: -1.0080  p-value: 0.0000
+   IMR coefficient: -1.1095  p-value: 0.0000
    OK: IMR is statistically significant at 10% level
 
 2. Exclusion Restriction Strength (LR Test)
 ----------------------------------------
-   LR statistic: 343.2648  p-value: 0.0000
+   LR statistic: 407.5843  p-value: 0.0000
    OK: Excluded variables are jointly significant
 
 3. Naive OLS vs. Heckman Coefficient Comparison
 ----------------------------------------
    Variable                               Heckman  Naive OLS   % Change
    ----------------------------------------------------------------------
-   log_gdp_level                           2.2294     2.6406     -15.6%
-   fiscal_balance_pct_gdp                  0.1375     0.1459      -5.7%
-   ida_vote_share_lag                      0.1355     0.1606     -15.7%
-   trade_exposure_ida                     -0.1641    -0.2940     +44.2%
-   log_donation_lag                        0.3654     0.6283     -41.8%
-   us_eu_ally                             -1.7159    -0.8609     -99.3%
-   sovereign_credit_rating                 0.2207     0.3890     -43.3%
+   log_gdp_level                           2.2415     2.4717      -9.3%
+   fiscal_balance_pct_gdp                  0.3421     0.4059     -15.7%
+   ida_vote_share_lag                      0.1691     0.2736     -38.2%
+   trade_exposure_ida                     -0.2237    -0.4381     +48.9%
+   log_donation_lag                        0.4231     0.7467     -43.3%
+   us_eu_ally                             -2.1101    -0.8947    -135.8%
 
 4. Heteroskedasticity (Breusch-Pagan)
 ----------------------------------------
@@ -31,37 +30,36 @@ HECKMAN SELECTION MODEL — DIAGNOSTICS REPORT
 
 5. Variance Inflation Factors (Stage 2)
 ----------------------------------------
-   log_gdp_level                       VIF=7.42
-   fiscal_balance_pct_gdp              VIF=1.57
-   ida_vote_share_lag                  VIF=5.40
-   trade_exposure_ida                  VIF=2.41
-   log_donation_lag                    VIF=2.72
-   us_eu_ally                          VIF=1.76
-   sovereign_credit_rating             VIF=1.93
-   imr                                 VIF=2.38
-   round_IDA10                         VIF=4.50
-   round_IDA11                         VIF=4.84
-   round_IDA12                         VIF=4.80
-   round_IDA13                         VIF=5.13
-   round_IDA14                         VIF=5.46
-   round_IDA15                         VIF=6.09
-   round_IDA16                         VIF=6.20
-   round_IDA17                         VIF=6.13
-   round_IDA2                          VIF=2.70
-   round_IDA3                          VIF=2.75
-   round_IDA4                          VIF=2.92
-   round_IDA5                          VIF=3.25
-   round_IDA6                          VIF=3.72
+   log_gdp_level                       VIF=6.95
+   fiscal_balance_pct_gdp              VIF=1.22
+   ida_vote_share_lag                  VIF=5.05
+   trade_exposure_ida                  VIF=2.20
+   log_donation_lag                    VIF=2.66
+   us_eu_ally                          VIF=1.89
+   imr                                 VIF=2.42
+   round_IDA10                         VIF=4.49
+   round_IDA11                         VIF=4.81
+   round_IDA12                         VIF=4.77
+   round_IDA13                         VIF=5.12
+   round_IDA14                         VIF=5.45
+   round_IDA15                         VIF=6.06
+   round_IDA16                         VIF=6.11
+   round_IDA17                         VIF=6.08
+   round_IDA2                          VIF=2.68
+   round_IDA3                          VIF=2.72
+   round_IDA4                          VIF=2.85
+   round_IDA5                          VIF=3.20
+   round_IDA6                          VIF=3.66
    round_IDA7                          VIF=3.96
-   round_IDA8                          VIF=3.95
+   round_IDA8                          VIF=3.96
    round_IDA9                          VIF=4.11
 
 6. Out-of-Sample Accuracy (IDA18–IDA20 holdout)
 ----------------------------------------
    Model                       MAE       RMSE
    ---------------------------------------------
-   Heckman                  1.2573     1.5527
-   Naive OLS                1.8145     1.9969
+   Heckman                  1.4128     1.7248
+   Naive OLS                1.9486     2.1492
    (OOS sample: 94 donor observations)
 
 ======================================================================

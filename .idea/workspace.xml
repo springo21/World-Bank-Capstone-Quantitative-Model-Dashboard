@@ -6,7 +6,32 @@
   <component name="ChangeListManager">
     <list default="true" id="92cb203b-1a01-4929-a369-225aa7ec9c14" name="Changes" comment="ui/ux update">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/cache/wdi.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/cache/wdi.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/processed/capacity_scores.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/capacity_scores.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/processed/master.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/master.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/processed/run_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/run_metadata.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/raw/heckman_panel.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/raw/heckman_panel.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/charts/chart1_gap_ranking.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart1_gap_ranking.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/charts/chart2_giving_rate.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart2_giving_rate.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/charts/chart3_capacity_vs_giving_rate.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart3_capacity_vs_giving_rate.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/charts/chart5_all_countries_gap.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart5_all_countries_gap.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/charts/chart5_world_map.html" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart5_world_map.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/charts/heckman_residuals.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/heckman_residuals.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/charts/regression_table.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/regression_table.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/dri_output.csv" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/dri_output.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/heckman_diagnostics.txt" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/heckman_diagnostics.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/regression_table.csv" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/regression_table.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/regression_table.txt" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/regression_table.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/build_panel.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/build_panel.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/capacity.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/capacity.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/heckman.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/heckman.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/ingest.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ingest.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/report.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/report.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/uv.lock" beforeDir="false" afterPath="$PROJECT_DIR$/uv.lock" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,6 +75,7 @@
   &quot;keyToString&quot;: {
     &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
     &quot;Python.app.executor&quot;: &quot;Run&quot;,
+    &quot;Python.build_panel.executor&quot;: &quot;Run&quot;,
     &quot;Python.capacity.executor&quot;: &quot;Run&quot;,
     &quot;Python.dash_app.executor&quot;: &quot;Run&quot;,
     &quot;Python.heckman.executor&quot;: &quot;Run&quot;,
@@ -198,7 +224,15 @@
       <option name="project" value="LOCAL" />
       <updated>1776988851644</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="ui/ux update">
+      <option name="closed" value="true" />
+      <created>1777019524763</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1777019524763</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

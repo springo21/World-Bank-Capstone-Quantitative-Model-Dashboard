@@ -5,26 +5,25 @@ Dependent variable: Stage 1 = donate_dummy | Stage 2 = log(donation_usd)
 Variable                                        Stage 1 (Probit)           Stage 2 (OLS+IMR)
                                              Coef.          (SE)         Coef.          (SE)
 --------------------------------------------------------------------------------------------
-Constant                                -3.2145***      (0.3623)    18.5332***      (0.4181)
-Log GDP per capita                       0.1177***      (0.0282)                            
-DAC member                               2.0761***      (0.1350)                            
-UN voting alignment                      1.7257***      (0.5914)                            
-Trade openness (% GDP)                   0.0022***      (0.0007)                            
-Governance effectiveness                    0.0456      (0.0842)                            
-Peer donor pressure                        -0.0746      (0.1640)                            
-Log GDP (level)                                                      2.2294***      (0.1637)
-Fiscal balance (% GDP)                                                  0.1375      (0.0882)
-IDA vote share (lag)                                                  0.1355**      (0.0655)
-Trade exposure to IDA countries                                      -0.1641**      (0.0720)
-Log donation (prior round)                                           0.3654***      (0.1263)
-US/EU ally                                                          -1.7159***      (0.3701)
-Sovereign credit rating                                              0.2207***      (0.0698)
-Inverse Mills Ratio (λ)                                             -1.0080***      (0.0976)
+Constant                                -4.2079***      (0.3597)    19.1363***      (0.4345)
+Log GDP per capita                       0.1301***      (0.0326)                            
+DAC member                               1.9212***      (0.1373)                            
+UN voting alignment                      2.7550***      (0.3389)                            
+Trade openness (% GDP)                   0.0028***      (0.0007)                            
+Governance effectiveness                   -0.1096      (0.0864)                            
+Peer donor pressure                         0.2819      (0.1817)                            
+Log GDP (level)                                                      2.2415***      (0.1521)
+Fiscal balance (% GDP)                                               0.3421***      (0.0725)
+IDA vote share (lag)                                                 0.1691***      (0.0644)
+Trade exposure to IDA countries                                     -0.2237***      (0.0606)
+Log donation (prior round)                                           0.4231***      (0.1202)
+US/EU ally                                                          -2.1101***      (0.3785)
+Inverse Mills Ratio (λ)                                             -1.1095***      (0.1246)
 --------------------------------------------------------------------------------------------
 Observations                                  1479                         385
-Pseudo R² / R²                              0.4883                      0.9103
-Adj. R²                                                                 0.9043
-Log-likelihood                             -433.91
+Pseudo R² / R²                              0.5263                      0.9026
+Adj. R²                                                                 0.8964
+Log-likelihood                             -401.75
 --------------------------------------------------------------------------------------------
 * p<0.10  ** p<0.05  *** p<0.01
 Standard errors in parentheses. Stage 2 uses HC3 robust SEs where heteroskedasticity detected.
