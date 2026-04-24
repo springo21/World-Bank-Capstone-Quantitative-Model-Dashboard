@@ -72,7 +72,10 @@ def load_data():
     )
 
     df["gdp_bn"]    = df["gdp_usd"] / 1e9
-    df["gap_bn"]    = df["gap_usd"] / 1e9
+    gap_col = "gap_usd" if "gap_usd" in df.columns else "gap_usd_signed"
+
+    df["gap_bn"] = df[gap_col] / 1e9
+    df["gap_usd"] = df[gap_col]  # normalize so rest of app works
     df["actual_bn"] = df["actual_contribution_usd"] / 1e9
     df["target_bn"] = df["adjusted_target_usd"] / 1e9
 
