@@ -322,7 +322,7 @@ st.markdown(f"""
     /* placeholder text in inputs */
     .stMultiSelect span[data-baseweb="tag"] + div input,
     .stSelectbox input {{
-        color: rgba(255,255,255,0.7) !important;
+        color: var(--text) !important;
     }}
 
     /* ── Progress bar — theme green ── */
@@ -771,7 +771,8 @@ elif page == "Country Explorer":
     st.divider()
 
     country_list     = sorted(filtered["country_name"].dropna().tolist())
-    selected_country = st.selectbox("Select a country", country_list)
+    default_country = "United States"
+    selected_country = st.selectbox("Select a country", country_list, index=country_list.index(default_country) if default_country in country_list else 0)
     row              = df[df["country_name"] == selected_country].iloc[0]
     seg              = row["donor_segment"]
     seg_color        = SEGMENT_COLORS.get(str(seg), COLORS["muted"])
@@ -1087,7 +1088,7 @@ elif page == "Prospect Ranking":
 # PAGE 5 — WORLD MAP
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "World Map":
-    st.title("World Map — Contribution Gap")
+    st.title("World Map -- Contribution Gap")
     st.markdown(
         "<p class='subtle-note'>"
         "<strong>Dark clay</strong> = large positive gap (under-contributing). &nbsp;"
@@ -1099,8 +1100,15 @@ elif page == "World Map":
 
     map_df            = filtered[filtered["gap_usd"].notna()].copy()
     map_df["_z"]      = map_df["gap_usd"].apply(symlog)
-    zmax              = float(map_df["_z"].quantile(0.98))
-    zmin              = float(map_df["_z"].quantile(0.02))
+    # Pin $0 gap to exactly the midpoint of the colour scale (0.5 = snow).
+    # We do this by making zmin and zmax symmetric around 0 in symlog space,
+    # so that symlog(0) = 0 always maps to the centre of the scale.
+    abs_max = max(abs(float(map_df["_z"].quantile(0.98))),
+                  abs(float(map_df["_z"].quantile(0.02))))
+    zmin = -abs_max
+    zmax = abs_max
+    # zmid=0 tells Plotly to anchor the midpoint colour at z=0
+    zmid = 0
     map_df["_gap_fmt"]    = map_df["gap_usd"].apply(fmt_usd)
     map_df["_actual_fmt"] = map_df["actual_contribution_usd"].apply(fmt_usd)
     map_df["_target_fmt"] = map_df["adjusted_target_usd"].apply(fmt_usd)
@@ -1476,8 +1484,7 @@ elif page == "Glossary":
         )
 
     # ── Section 1: Core Index Concepts ──────────────────────────────────────
-    st.markdown("### Core Index Concepts")
-    st.markdown("<br>", unsafe_allow_html=True)
+    st.markdown("### Main Index Concepts")
 
     glossary_card(
         "Donor Readiness Index (DRI)",
@@ -1528,7 +1535,6 @@ elif page == "Glossary":
 
     # ── Section 2: Heckman Model ─────────────────────────────────────────────
     st.markdown("### Heckman Two-Stage Selection Model")
-    st.markdown("<br>", unsafe_allow_html=True)
 
     glossary_card(
         "Selection Bias",
@@ -1580,7 +1586,6 @@ elif page == "Glossary":
 
     # ── Section 3: Diagnostic Statistics ────────────────────────────────────
     st.markdown("### Diagnostic Statistics")
-    st.markdown("<br>", unsafe_allow_html=True)
 
     glossary_card(
         "Pseudo R²",
@@ -1622,7 +1627,6 @@ elif page == "Glossary":
 
     # ── Section 4: Country Segments ─────────────────────────────────────────
     st.markdown("### Country Segments")
-    st.markdown("<br>", unsafe_allow_html=True)
 
     segment_defs = [
         ("Reliable Donor",           COLORS["navy"],
