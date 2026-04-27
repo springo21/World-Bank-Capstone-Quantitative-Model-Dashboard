@@ -40,9 +40,11 @@ COLORS = {
 SEGMENT_COLORS = {
     "Reliable Donor":            COLORS["navy"],
     "Under-Contributing Donor":  COLORS["clay"],
-    "High-Potential Prospect":   COLORS["green"],
+    "Exceeded Target":           COLORS["green"],
+    "High-Potential Prospect":   "#4a9068",
     "Emerging Prospect":         COLORS["bone"],
     "Low Probability":           "#c9c2b5",
+    "Non-Donor":                 "#d4cfc9",
 }
 
 # ── Paths ─────────────────────────────────────────────────────────────────────
@@ -72,19 +74,31 @@ def load_data():
     )
 
     df["gdp_bn"]    = df["gdp_usd"] / 1e9
-    gap_col = "gap_usd" if "gap_usd" in df.columns else "gap_usd_signed"
 
-    df["gap_bn"] = df[gap_col] / 1e9
-    df["gap_usd"] = df[gap_col]  # normalize so rest of app works
+    # Model now uses gap_usd_signed (positive = shortfall, negative = over-contribution)
+    df["gap_usd"]   = df["gap_usd_signed"]
+    df["gap_bn"]    = df["gap_usd"] / 1e9
     df["actual_bn"] = df["actual_contribution_usd"] / 1e9
     df["target_bn"] = df["adjusted_target_usd"] / 1e9
 
+    # New: PPP gap percentage and confidence interval columns
+    df["gap_pct_ppp_gdp"] = df.get("gap_pct_ppp_gdp", pd.Series(dtype=float))
+    df["gap_usd_lower"]   = df.get("gap_usd_lower", pd.Series(dtype=float))
+    df["gap_usd_upper"]   = df.get("gap_usd_upper", pd.Series(dtype=float))
+
+    # Updated segment order — now includes Exceeded Target and Non-Donor
     segment_order = [
-        "Reliable Donor", "Under-Contributing Donor",
-        "High-Potential Prospect", "Emerging Prospect", "Low Probability",
+        "Exceeded Target",
+        "Reliable Donor",
+        "Under-Contributing Donor",
+        "High-Potential Prospect",
+        "Emerging Prospect",
+        "Low Probability",
+        "Non-Donor",
     ]
+    existing = [s for s in segment_order if s in df["donor_segment"].values]
     df["donor_segment"] = pd.Categorical(
-        df["donor_segment"], categories=segment_order, ordered=True
+        df["donor_segment"], categories=existing, ordered=True
     )
     df["is_donor"] = df["actual_contribution_usd"] > 0
     return df.sort_values("gap_usd", ascending=False).reset_index(drop=True)
@@ -655,6 +669,7 @@ if page == "Overview":
     n_prospects     = len(filtered[filtered["donor_segment"].isin(
                           ["High-Potential Prospect", "Emerging Prospect"])])
     n_under         = len(filtered[filtered["donor_segment"] == "Under-Contributing Donor"])
+    n_exceeded      = len(filtered[filtered["donor_segment"] == "Exceeded Target"])
     n_donors        = len(filtered[filtered["is_donor"]])
     avg_giving_rate = filtered[filtered["is_donor"]]["giving_rate"].median()
 
@@ -662,8 +677,8 @@ if page == "Overview":
         ("Total Addressable Gap",      fmt_usd(total_gap),          None, None),
         ("Current Donors in Sample",   str(n_donors),               None, None),
         ("Under-Contributing Donors",  str(n_under),                None, None),
+        ("Exceeded Target",            str(n_exceeded),             None, None),
         ("High/Emerging Prospects",    str(n_prospects),            None, None),
-        ("Median Giving Rate (donors)",f"{avg_giving_rate:.0%}",    None, None),
     ])
     st.divider()
 
@@ -1034,8 +1049,10 @@ elif page == "Prospect Ranking":
     display_cols = {
         "country_name":            "Country",
         "income_group":            "Income",
+        "peer_group":              "Peer Group",
         "donor_segment":           "Segment",
         "gap_usd":                 "Gap (USD)",
+        "gap_pct_ppp_gdp":         "Gap % PPP GDP",
         "giving_rate":             "Giving Rate",
         "p_donate":                "P(Donate)",
         "adjusted_target_usd":     "Capacity Target",
@@ -1044,6 +1061,8 @@ elif page == "Prospect Ranking":
     }
     tbl = prospect_df[list(display_cols.keys())].rename(columns=display_cols).copy()
     tbl["Gap (USD)"]       = tbl["Gap (USD)"].apply(fmt_usd)
+    tbl["Gap % PPP GDP"]   = tbl["Gap % PPP GDP"].apply(
+        lambda x: f"{x:.4f}%" if not pd.isna(x) else "—")
     tbl["Giving Rate"]     = tbl["Giving Rate"].apply(
         lambda x: f"{x:.1%}" if not pd.isna(x) else "—")
     tbl["P(Donate)"]       = tbl["P(Donate)"].apply(
@@ -1186,7 +1205,7 @@ elif page == "Model Diagnostics":
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("IMR p-value",            "< 0.001",   delta="Selection bias confirmed", delta_color="normal")
     col2.metric("LR Excl. Restriction",   "p < 0.001", delta="Strong instruments",       delta_color="normal")
-    col3.metric("Heckman OOS MAE",        "1.2573",    delta="-0.56 vs OLS: 1.8145",     delta_color="inverse")
+    col3.metric("Heckman OOS MAE",        "1.4128",    delta="-0.54 vs OLS: 1.9486",     delta_color="inverse")
     col4.metric("BP Heteroskedasticity",  "p < 0.001", delta="HC3 robust SEs applied",   delta_color="normal")
 
     st.divider()
@@ -1203,12 +1222,11 @@ elif page == "Model Diagnostics":
         )
         coef_data = {
             "Variable":  ["log_gdp_level", "fiscal_balance_pct_gdp", "ida_vote_share_lag",
-                          "trade_exposure_ida", "log_donation_lag", "us_eu_ally",
-                          "sovereign_credit_rating"],
-            "Heckman":   [2.2294, 0.1375,  0.1355, -0.1641,  0.3654, -1.7159, 0.2207],
-            "Naive OLS": [2.6406, 0.1459,  0.1606, -0.2940,  0.6283, -0.8609, 0.3890],
-            "% Change":  ["-15.6%", "-5.7%", "-15.7%", "+44.2%",
-                          "-41.8%", "-99.3%", "-43.3%"],
+                          "trade_exposure_ida", "log_donation_lag", "us_eu_ally"],
+            "Heckman":   [2.2415, 0.3421,  0.1691, -0.2237,  0.4231, -2.1101],
+            "Naive OLS": [2.4717, 0.4059,  0.2736, -0.4381,  0.7467, -0.8947],
+            "% Change":  ["-9.3%", "-15.7%", "-38.2%", "+48.9%",
+                          "-43.3%", "-135.8%"],
         }
         coef_df = pd.DataFrame(coef_data)
         fig_coef = go.Figure()
@@ -1233,9 +1251,8 @@ elif page == "Model Diagnostics":
         )
         vif_data = {
             "Variable": ["log_gdp_level", "fiscal_balance_pct_gdp", "ida_vote_share_lag",
-                         "trade_exposure_ida", "log_donation_lag", "us_eu_ally",
-                         "sovereign_credit_rating", "imr"],
-            "VIF":      [7.42, 1.57, 5.40, 2.41, 2.72, 1.76, 1.93, 2.38],
+                         "trade_exposure_ida", "log_donation_lag", "us_eu_ally", "imr"],
+            "VIF":      [6.95, 1.22, 5.05, 2.20, 2.66, 1.89, 2.42],
         }
         vif_df = pd.DataFrame(vif_data).sort_values("VIF", ascending=False)
         fig_vif = go.Figure(go.Bar(

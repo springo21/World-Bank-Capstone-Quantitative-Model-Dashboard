@@ -4,34 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="92cb203b-1a01-4929-a369-225aa7ec9c14" name="Changes" comment="ui/ux update">
+    <list default="true" id="92cb203b-1a01-4929-a369-225aa7ec9c14" name="Changes" comment="fix: variable consistency">
+      <change afterPath="$PROJECT_DIR$/data/raw/IdealPointDyads1946-2025.csv" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/.openspec.yaml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/design.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/proposal.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/specs/composite-dri-score/spec.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/specs/gap-confidence-intervals/spec.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/specs/giving-rate-normalization/spec.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/specs/peer-group-benchmark/spec.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/specs/ppp-gap-metrics/spec.md" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/tasks.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/CLAUDE.md" beforeDir="false" afterPath="$PROJECT_DIR$/CLAUDE.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/cache/wdi.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/cache/wdi.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/capacity_scores.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/capacity_scores.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/master.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/master.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/run_metadata.json" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/run_metadata.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/raw/heckman_panel.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/raw/heckman_panel.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/charts/chart1_gap_ranking.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart1_gap_ranking.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/charts/chart2_giving_rate.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart2_giving_rate.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/charts/chart3_capacity_vs_giving_rate.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart3_capacity_vs_giving_rate.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/charts/chart5_all_countries_gap.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart5_all_countries_gap.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/charts/chart5_world_map.html" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart5_world_map.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/charts/heckman_residuals.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/heckman_residuals.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/charts/regression_table.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/regression_table.png" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/dri_output.csv" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/dri_output.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/heckman_diagnostics.txt" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/heckman_diagnostics.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/regression_table.csv" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/regression_table.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/outputs/regression_table.txt" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/regression_table.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pyproject.toml" beforeDir="false" afterPath="$PROJECT_DIR$/pyproject.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/build_panel.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/build_panel.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/capacity.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/capacity.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/heckman.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/heckman.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ingest.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/ingest.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/report.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/report.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/uv.lock" beforeDir="false" afterPath="$PROJECT_DIR$/uv.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -232,13 +217,49 @@
       <option name="project" value="LOCAL" />
       <updated>1777019524763</updated>
     </task>
-    <option name="localTasksCounter" value="16" />
+    <task id="LOCAL-00016" summary="model updated">
+      <option name="closed" value="true" />
+      <created>1777049936692</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1777049936693</updated>
+    </task>
+    <task id="LOCAL-00017" summary="push reqs">
+      <option name="closed" value="true" />
+      <created>1777050165941</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1777050165941</updated>
+    </task>
+    <task id="LOCAL-00018" summary="fix: add streamlit dependency">
+      <option name="closed" value="true" />
+      <created>1777050345421</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1777050345422</updated>
+    </task>
+    <task id="LOCAL-00019" summary="fix: variable consistency">
+      <option name="closed" value="true" />
+      <created>1777050671277</created>
+      <option name="number" value="00019" />
+      <option name="presentableId" value="LOCAL-00019" />
+      <option name="project" value="LOCAL" />
+      <updated>1777050671277</updated>
+    </task>
+    <option name="localTasksCounter" value="20" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="first" />
     <MESSAGE value="added glossary page" />
     <MESSAGE value="ui/ux update" />
-    <option name="LAST_COMMIT_MESSAGE" value="ui/ux update" />
+    <MESSAGE value="model updated" />
+    <MESSAGE value="push reqs" />
+    <MESSAGE value="fix: add streamlit dependency" />
+    <MESSAGE value="fix: variable consistency" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: variable consistency" />
   </component>
 </project>
