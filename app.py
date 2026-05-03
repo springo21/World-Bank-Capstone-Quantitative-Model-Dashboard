@@ -15,7 +15,7 @@ import streamlit as st
 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
-    page_title="IDA Donor Readiness Index",
+    page_title="IDA Donor Readiness Model",
     page_icon="drilogo.png",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -589,8 +589,9 @@ NAV_ITEMS = [
     ("Prospect Ranking",  "format_list_numbered"),
     ("World Map",         "public"),
     ("Model Diagnostics", "data_thresholding"),
-    ("Glossary",          "toc"),
     ("Interview Findings","communication"),
+    ("Glossary",          "toc"),
+
 ]
 
 # Initialise session state for active page
@@ -600,7 +601,7 @@ if "page" not in st.session_state:
 with st.sidebar:
     st.markdown("""
         <div class="sidebar-brand">
-            <div class="sidebar-title">IDA DRI</div>
+            <div class="sidebar-title">IDA Partnerships</div>
             <div class="sidebar-subtitle">Capstone Research Dashboard</div>
         </div>
     """, unsafe_allow_html=True)
@@ -653,7 +654,7 @@ page = st.session_state.page
 # PAGE 1 — OVERVIEW
 # ─────────────────────────────────────────────────────────────────────────────
 if page == "Overview":
-    st.title("IDA Sovereign Donor Readiness Index")
+    st.title("IDA Sovereign Donor Readiness Model")
     st.markdown(
         "<p class='subtle-note' style='line-height:1.6'>"
         "This dashboard presents the findings of a quantitative model assessing which "
@@ -1111,32 +1112,35 @@ elif page == "Prospect Ranking":
 # PAGE 5 — WORLD MAP
 # ─────────────────────────────────────────────────────────────────────────────
 elif page == "World Map":
-    st.title("World Map -- Contribution Gap")
+    st.title("World Map — Contribution Gap")
     st.markdown(
         "<p class='subtle-note'>"
         "<strong>Dark clay</strong> = large positive gap (under-contributing). &nbsp;"
-        "<strong>Deep navy</strong> = over-contributing relative to capacity. &nbsp;"
-        "<strong>White</strong> = contributing at benchmark.</p>",
+        "<strong>Deep navy</strong> = over-contributing / Exceeded Target. &nbsp;"
+        "<strong>Off-white</strong> = contributing close to benchmark.<br>"
+        "<small>Gap uses PPP-adjusted GDP where available; falls back to nominal GDP.</small>"
+        "</p>",
         unsafe_allow_html=True,
     )
     st.divider()
 
-    map_df            = filtered[filtered["gap_usd"].notna()].copy()
-    map_df["_z"]      = map_df["gap_usd"].apply(symlog)
-    # Pin $0 gap to exactly the midpoint of the colour scale (0.5 = snow).
-    # We do this by making zmin and zmax symmetric around 0 in symlog space,
-    # so that symlog(0) = 0 always maps to the centre of the scale.
-    abs_max = max(abs(float(map_df["_z"].quantile(0.98))),
-                  abs(float(map_df["_z"].quantile(0.02))))
-    zmin = -abs_max
-    zmax = abs_max
-    # zmid=0 tells Plotly to anchor the midpoint colour at z=0
-    zmid = 0
+    map_df = filtered[filtered["gap_usd"].notna()].copy()
+    map_df["_z"]          = map_df["gap_usd"].apply(symlog)
     map_df["_gap_fmt"]    = map_df["gap_usd"].apply(fmt_usd)
     map_df["_actual_fmt"] = map_df["actual_contribution_usd"].apply(fmt_usd)
     map_df["_target_fmt"] = map_df["adjusted_target_usd"].apply(fmt_usd)
-    map_df["_rate_fmt"]   = map_df["giving_rate"].apply(
+    map_df["_rate_fmt"]   = map_df.get("giving_rate_raw", map_df["giving_rate"]).apply(
         lambda x: f"{x:.1%}" if not pd.isna(x) else "—")
+    map_df["_ppp_fmt"]    = map_df["gap_pct_ppp_gdp"].apply(
+        lambda x: f"{x:.4f}% of PPP GDP" if not pd.isna(x) else "—")
+
+    # Symmetric symlog scale so gap=$0 always maps to snow midpoint
+    abs_max = max(
+        abs(float(map_df["_z"].quantile(0.98))),
+        abs(float(map_df["_z"].quantile(0.02)))
+    )
+    zmin = -abs_max
+    zmax =  abs_max
 
     tick_dollars = [-1e9, -1e8, -1e7, -1e6, 0, 1e6, 1e7, 1e8, 1e9]
     tick_vals    = [symlog(v) for v in tick_dollars]
@@ -1147,43 +1151,65 @@ elif page == "World Map":
         [0.0,  COLORS["navy"]],
         [0.35, COLORS["soft_blue"]],
         [0.5,  COLORS["snow"]],
-        [0.7,  COLORS["soft_clay"]],
+        [0.65, COLORS["soft_clay"]],
         [1.0,  COLORS["clay"]],
     ]
 
     fig_map = go.Figure(go.Choropleth(
-        locations=map_df["iso3"], z=map_df["_z"], locationmode="ISO-3",
-        colorscale=rdb_colorscale, zmin=zmin, zmax=zmax, zmid=0,
-        customdata=map_df[["country_name", "_gap_fmt", "_rate_fmt",
-                            "_actual_fmt", "_target_fmt", "donor_segment"]].values,
+        locations=map_df["iso3"],
+        z=map_df["_z"],
+        locationmode="ISO-3",
+        colorscale=rdb_colorscale,
+        zmin=zmin, zmax=zmax, zmid=0,
+        customdata=map_df[[
+            "country_name", "_gap_fmt", "_rate_fmt",
+            "_actual_fmt", "_target_fmt", "donor_segment", "_ppp_fmt"
+        ]].values,
         hovertemplate=(
-            "<b>%{customdata[0]}</b><br>Segment: %{customdata[5]}<br>"
-            "Gap: %{customdata[1]}<br>Giving Rate: %{customdata[2]}<br>"
-            "Actual IDA21: %{customdata[3]}<br>Capacity Target: %{customdata[4]}"
-            "<extra></extra>"),
+            "<b>%{customdata[0]}</b><br>"
+            "Segment: %{customdata[5]}<br>"
+            "Gap: %{customdata[1]}<br>"
+            "Giving Rate: %{customdata[2]}<br>"
+            "Actual IDA21: %{customdata[3]}<br>"
+            "Capacity Target: %{customdata[4]}<br>"
+            "Gap % PPP GDP: %{customdata[6]}"
+            "<extra></extra>"
+        ),
         colorbar=dict(
             title=dict(text="Contribution Gap", side="right", font=dict(size=13)),
-            tickvals=tick_vals, ticktext=tick_text,
+            tickvals=tick_vals + [zmax * 1.08, zmin * 1.08],
+            ticktext=tick_text + ["▲ Under-contributor", "▼ Exceeded Target"],
             tickfont=dict(size=10), len=0.75, thickness=18, outlinewidth=0,
         ),
         marker_line_color="white", marker_line_width=0.5,
     ))
+
     fig_map.update_layout(
-        geo=dict(showland=True, landcolor="lightgray", showframe=False,
-                 showcoastlines=True, coastlinecolor="white",
-                 projection_type="natural earth"),
+        geo=dict(
+            showland=True, landcolor="lightgray",
+            showframe=False, showcoastlines=True,
+            coastlinecolor="white", projection_type="natural earth",
+        ),
         margin=dict(l=0, r=0, t=10, b=0), height=580,
         paper_bgcolor="white",
-        font=dict(family="Inter, Arial, sans-serif", color=COLORS["text"], size=13),
+        font=dict(family="Inter, Arial, sans-serif",
+                  color=COLORS["text"], size=13),
     )
     st.plotly_chart(fig_map, use_container_width=True)
 
     st.divider()
     st.markdown("#### Map Data Table")
-    tbl_map = map_df[["country_name", "donor_segment", "_gap_fmt",
-                       "_rate_fmt", "_actual_fmt", "_target_fmt"]].copy()
-    tbl_map.columns = ["Country", "Segment", "Gap",
-                        "Giving Rate", "Actual IDA21", "Capacity Target"]
+    map_df["_status"] = map_df["actual_contribution_usd"].apply(
+        lambda x: "No contribution" if x == 0 else "Active donor"
+    )
+    tbl_map = map_df[[
+        "country_name", "donor_segment", "peer_group", "_status",
+        "_gap_fmt", "_ppp_fmt", "_rate_fmt", "_actual_fmt", "_target_fmt"
+    ]].copy()
+    tbl_map.columns = [
+        "Country", "Segment", "Peer Group", "Status",
+        "Gap", "Gap % PPP GDP", "Giving Rate", "Actual IDA21", "Capacity Target"
+    ]
     st.dataframe(tbl_map.reset_index(drop=True),
                  hide_index=True, use_container_width=True, height=300)
     soft_card_close()
@@ -1515,41 +1541,45 @@ elif page == "Glossary":
     )
     glossary_card(
         "Capacity Target",
-        "The estimated contribution a country could make to IDA based on its GDP, "
-        "calibrated using the median IDA/GDP ratio observed across current donors "
-        "and adjusted for fiscal space.",
-        formula="Capacity Target = GDP × Benchmark IDA/GDP Ratio × Fiscal Modifier",
-        source="Adapted from IDA replenishment contribution methodology",
+        "The estimated contribution a country could make to IDA, computed as its GDP "
+        "(PPP-adjusted where available, nominal otherwise) multiplied by the peer-group "
+        "benchmark IDA/GDP ratio for its income tier. The benchmark is the GDP-weighted "
+        "median contribution rate observed across current donors within the same peer group.",
+        formula="Target = GDP_ppp × Benchmark_rate(peer group)",
     )
     glossary_card(
         "Benchmark IDA/GDP Ratio",
-        "The median ratio of IDA21 contribution to GDP across all current donor "
-        "countries. Used as the reference contribution rate against which all "
-        "countries are assessed.",
-        formula="Benchmark = median(IDA21 contribution / GDP) across current donors",
+        "The GDP-weighted median IDA contribution rate among current donors, computed "
+        "separately per income-tier peer group (HIC, UMC, LMC, LIC). Requires at least "
+        "3 donors per group; otherwise falls back to the global GDP-weighted median. "
+        "PPP-adjusted GDP is used as the weight where available.",
+        formula="Benchmark(g) = weighted_median({ contribution_i / GDP_ppp_i : i ∈ donors in group g })",
     )
     glossary_card(
         "Fiscal Modifier",
-        "An adjustment (capped at ±20%) applied to the capacity "
-        "target based on a country's fiscal balance as a share of GDP. Countries "
-        "running surpluses get an upward adjustment; those with deficits get "
-        "a downward adjustment.",
-        formula="Fiscal Modifier = 1 + clamp(Fiscal Balance / 100, −0.20, +0.20)",
+        "A linear adjustment applied to the capacity target based on a country's fiscal "
+        "balance as a percentage of GDP. A 5% surplus produces the maximum +20% upward "
+        "adjustment; a 5% deficit produces the maximum −20% downward adjustment. "
+        "Missing fiscal data defaults to a modifier of 0. Used in the rule-based "
+        "capacity scorer only — the Heckman model uses fiscal balance as a direct regressor.",
+        formula="Modifier = clip(fiscal_balance_pct × 0.04,  −0.20,  +0.20)\nAdjusted Target = Target × (1 + Modifier)",
     )
     glossary_card(
         "Contribution Gap",
-        "The difference between a country's capacity target and its actual IDA21 "
-        "contribution. A positive gap means the country is giving less than its "
-        "capacity suggests it could. A negative gap means it is over-contributing "
-        "relative to its capacity.",
-        formula="Gap = Capacity Target − Actual IDA21 Contribution",
+        "The signed difference between the adjusted capacity target and actual IDA21 "
+        "contribution. Positive = shortfall (giving less than capacity). "
+        "Negative = over-contribution. In the Heckman model the target is the "
+        "expected_contribution from the two-stage prediction; in the rule-based "
+        "model it is the fiscal-adjusted benchmark target.",
+        formula="Gap = Adjusted Target − Actual Contribution\ngap_pct_ppp_gdp = (Gap / GDP_ppp) × 100",
     )
     glossary_card(
         "Giving Rate",
         "Actual IDA21 contribution expressed as a fraction of the capacity target. "
-        "A rate of 1.0 means giving exactly at benchmark. Below 1.0 = "
-        "under-contributing; above 1.0 = over-contributing.",
-        formula="Giving Rate = Actual Contribution / Capacity Target",
+        "giving_rate_raw is the uncapped ratio — values above 1.0 indicate "
+        "over-contribution and trigger the Exceeded Target segment. "
+        "giving_rate is capped at 1.0 for use in segment threshold logic.",
+        formula="giving_rate_raw = Actual / Adjusted Target\ngiving_rate = min(giving_rate_raw, 1.0)",
     )
 
     st.divider()
@@ -1568,39 +1598,63 @@ elif page == "Glossary":
     glossary_card(
         "Stage 1 — Selection Equation (Probit)",
         "Models the binary decision of whether a country donates in a given "
-        "replenishment round. The dependent variable is a donate dummy (1 or 0). "
-        "Produces a predicted probability of donating P(Donate) for every country.",
-        formula="P(Dᵢₜ = 1) = Φ(z′ᵢₜ γ)    where Φ = standard normal CDF",
+        "replenishment round. Variables: log GDP per capita, DAC membership, "
+        "UN voting alignment, trade openness, governance effectiveness, peer donor pressure. "
+        "The last three are exclusion restrictions — present in Stage 1 only.",
+        formula="P(D_it = 1) = Φ(z′_it γ)    where Φ = standard normal CDF\n"
+                "z = [log_gdp_per_capita, dac_member, un_voting_align,\n"
+                "     trade_openness, gov_effectiveness, peer_donor]",
     )
     glossary_card(
         "Stage 2 — Outcome Equation (OLS + IMR)",
-        "Models the log donation amount conditional on donating. The Inverse Mills "
-        "Ratio from Stage 1 is included as a regressor to correct for selection bias. "
-        "Estimated on the donor subsample only.",
-        formula="ln(Yᵢₜ) = x′ᵢₜ β + δλᵢₜ + εᵢₜ    for Dᵢₜ = 1",
+        "Models log-donation amount conditional on donating, on the donor subsample only. "
+        "The IMR from Stage 1 is included to correct for selection bias. "
+        "HC3 robust standard errors applied when Breusch-Pagan p < 0.05. "
+        "Round fixed effects included for all replenishment rounds. "
+        "sovereign_credit_rating dropped (collinear with GDP/governance).",
+        formula="ln(Y_it) = x′_it β + δλ_it + Σ_r α_r Round_r + ε_it\n"
+                "x = [log_gdp_level, fiscal_balance_pct_gdp, ida_vote_share_lag,\n"
+                "     trade_exposure_ida, log_donation_lag]",
     )
     glossary_card(
         "Inverse Mills Ratio (IMR / λ)",
-        "A correction term derived from the Stage 1 probit that captures the "
-        "expected value of the error in Stage 2 attributable to selection bias. "
-        "A statistically significant IMR confirms that selection bias was present "
-        "and the correction was necessary. In this model: λ̂ = −1.008, p < 0.001.",
-        formula="λᵢₜ = φ(ẑ′ᵢₜ γ̂) / Φ(ẑ′ᵢₜ γ̂)    where φ = standard normal PDF",
+        "Derived from Stage 1 fitted values. Captures the expected value of the "
+        "Stage 2 error attributable to non-random selection into the donor sample. "
+        "A significant IMR coefficient confirms selection bias was present. "
+        "IMR is clipped to avoid division by near-zero values of Φ(·).",
+        formula="λ_it = φ(z′_it γ̂) / max(Φ(z′_it γ̂), 1×10⁻¹⁰)\n"
+                "where φ = standard normal PDF, Φ = standard normal CDF",
     )
     glossary_card(
         "Duan Smearing Correction",
-        "A retransformation correction applied when converting log-donation "
-        "predictions back to dollar amounts. Prevents systematic underestimation "
-        "of the contribution by large donors.",
-        formula="Δ̂ = (1/n) Σ exp(ε̂ᵢₜ)    (mean of exponentiated residuals)",
-        source="Duan, N. (1983)",
+        "Applied when exponentiating log-donation predictions back to dollar amounts. "
+        "The smearing factor is the mean of the exponentiated Stage 2 residuals, "
+        "computed on the training donor subsample.",
+        formula="Δ̂ = mean(exp(ε̂_it))   for i in training donors\n"
+                "pred_donation_usd = exp(x′β̂ + δ̂λ) × Δ̂",
+        source="Duan, N. (1983). JASA, 78(383), 605–610",
     )
     glossary_card(
         "Expected Contribution",
-        "Final model prediction combining both stages: the probability of donating "
-        "multiplied by the predicted amount and the smearing factor. For current "
-        "donors P(Donate) is set to 1.",
-        formula="E[Yᵢₜ] = P(Donate) × exp(x′ᵢₜ β̂ + δ̂λᵢₜ) × Δ̂",
+        "Final model prediction. For current donors P(Donate) is set to 1.0 — "
+        "their participation is already resolved. For non-donors the p_donate "
+        "from Stage 1 scales the predicted amount. A per-country historical giving "
+        "rate (or archetype rate for non-donors) is used as the rate, scaled by "
+        "the ratio of the IDA21 median rate to the training-period median rate.",
+        formula="E[Y_it] = p × rate(iso3) × GDP_usd\n"
+                "where p = 1.0 for donors, p = P(Donate) for non-donors\n"
+                "and rate is scaled by (IDA21 median rate / training median rate)",
+    )
+    glossary_card(
+        "Gap Confidence Interval (90%)",
+        "Approximate 90% confidence bounds on the gap, derived from the Stage 2 "
+        "residual standard deviation. The interval widens with country GDP — "
+        "larger economies have larger absolute uncertainty on the predicted contribution. "
+        "These are approximations: full two-stage propagation of uncertainty would "
+        "require block bootstrap.",
+        formula="se = √(MSE_resid from Stage 2)\n"
+                "gap_lower = gap − 1.645 × se × GDP_usd\n"
+                "gap_upper = gap + 1.645 × se × GDP_usd",
     )
 
     st.divider()
@@ -1650,21 +1704,20 @@ elif page == "Glossary":
     st.markdown("### Country Segments")
 
     segment_defs = [
-        ("Reliable Donor",           COLORS["navy"],
-         "Current IDA donor contributing at or above their capacity-adjusted target "
-         "(giving rate ≥ 0.80)."),
+        ("Exceeded Target", COLORS["green"],
+         "Giving rate raw > 1.0. Country is contributing more than the model-estimated "
+         "capacity target. Checked before all other segment rules."),
+        ("Reliable Donor", COLORS["navy"],
+         "Current IDA donor with gap_pct ≤ 20% of expected contribution "
+         "(i.e. (expected − actual) / expected ≤ 0.20)."),
         ("Under-Contributing Donor", COLORS["clay"],
-         "Current IDA donor contributing meaningfully below their capacity target "
-         "(giving rate < 0.80). Represents the highest near-term opportunity."),
-        ("High-Potential Prospect",  COLORS["green"],
-         "Non-donor country with model-estimated P(Donate) ≥ 0.50. Structural "
-         "characteristics suggest a high likelihood of participation if engaged."),
-        ("Emerging Prospect",        COLORS["bone"],
-         "Non-donor country with P(Donate) between 0.20 and 0.50. Capacity exists "
-         "but political or institutional barriers to participation are higher."),
-        ("Low Probability",          COLORS["muted"],
-         "Non-donor country with P(Donate) below 0.20. Structural constraints make "
-         "near-term participation unlikely without significant relationship investment."),
+         "Current IDA donor with gap_pct > 20% of expected contribution."),
+        ("High-Potential Prospect", "#4a9068",
+         "Non-donor with P(Donate) ≥ 0.50 from Stage 1 probit."),
+        ("Emerging Prospect", COLORS["bone"],
+         "Non-donor with 0.20 ≤ P(Donate) < 0.50."),
+        ("Low Probability", COLORS["muted"],
+         "Non-donor with P(Donate) < 0.20."),
     ]
     for seg_name, seg_color, seg_desc in segment_defs:
         text_col = "#ffffff" if seg_color not in [COLORS["bone"], COLORS["muted"]] else COLORS["text"]
