@@ -590,6 +590,7 @@ NAV_ITEMS = [
     ("World Map",         "public"),
     ("Model Diagnostics", "data_thresholding"),
     ("Glossary",          "toc"),
+    ("Interview Findings","communication"),
 ]
 
 # Initialise session state for active page
@@ -1205,7 +1206,7 @@ elif page == "Model Diagnostics":
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("IMR p-value",            "< 0.001",   delta="Selection bias confirmed", delta_color="normal")
     col2.metric("LR Excl. Restriction",   "p < 0.001", delta="Strong instruments",       delta_color="normal")
-    col3.metric("Heckman OOS MAE",        "1.4128",    delta="-0.54 vs OLS: 1.9486",     delta_color="inverse")
+    col3.metric("Heckman OOS MAE",        "1.6051",    delta="-0.28 vs OLS: 1.8871",     delta_color="inverse")
     col4.metric("BP Heteroskedasticity",  "p < 0.001", delta="HC3 robust SEs applied",   delta_color="normal")
 
     st.divider()
@@ -1222,11 +1223,11 @@ elif page == "Model Diagnostics":
         )
         coef_data = {
             "Variable":  ["log_gdp_level", "fiscal_balance_pct_gdp", "ida_vote_share_lag",
-                          "trade_exposure_ida", "log_donation_lag", "us_eu_ally"],
-            "Heckman":   [2.2415, 0.3421,  0.1691, -0.2237,  0.4231, -2.1101],
-            "Naive OLS": [2.4717, 0.4059,  0.2736, -0.4381,  0.7467, -0.8947],
-            "% Change":  ["-9.3%", "-15.7%", "-38.2%", "+48.9%",
-                          "-43.3%", "-135.8%"],
+                          "trade_exposure_ida", "log_donation_lag"],
+            "Heckman":   [2.2847, 0.4310,  0.1340, -0.0546,  0.5456],
+            "Naive OLS": [2.4609, 0.4418,  0.2410, -0.3221,  0.7627],
+            "% Change":  ["-7.2%", "-2.5%", "-44.4%", "+83.0%",
+                          "-28.5%"],
         }
         coef_df = pd.DataFrame(coef_data)
         fig_coef = go.Figure()
@@ -1251,8 +1252,8 @@ elif page == "Model Diagnostics":
         )
         vif_data = {
             "Variable": ["log_gdp_level", "fiscal_balance_pct_gdp", "ida_vote_share_lag",
-                         "trade_exposure_ida", "log_donation_lag", "us_eu_ally", "imr"],
-            "VIF":      [6.95, 1.22, 5.05, 2.20, 2.66, 1.89, 2.42],
+                         "trade_exposure_ida", "log_donation_lag", "imr"],
+            "VIF":      [6.94, 1.20, 5.03, 1.91, 2.58, 2.03],
         }
         vif_df = pd.DataFrame(vif_data).sort_values("VIF", ascending=False)
         fig_vif = go.Figure(go.Bar(
@@ -1679,3 +1680,444 @@ elif page == "Glossary":
             </div>""",
             unsafe_allow_html=True,
         )
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PAGE 8 — INTERVIEW FINDINGS
+# ─────────────────────────────────────────────────────────────────────────────
+elif page == "Interview Findings":
+
+    st.title("Interview Findings")
+    st.markdown(
+        "<p class='subtle-note' style='max-width:900px;line-height:1.65'>"
+        "Qualitative findings from 9 semi-structured expert interviews with World Bank Group "
+        "staff, IDA economists, and a Gates Foundation programme officer. Interviews were "
+        "thematically coded across 13 categories (Role and Perspective excluded as non-substantive). "
+        "All interviewees participated in their individual capacity — views do not represent the "
+        "World Bank, IDA, or any institution. Interviewees are identified by letter code only."
+        "</p>",
+        unsafe_allow_html=True,
+    )
+    st.divider()
+
+    # ── Interviewee reference key ─────────────────────────────────────────────
+    st.markdown("#### Interviewee Reference Key")
+
+    interviewee_rows = [
+        ("A", "Donor Engagement, IDA", "WBG – Sovereign/System", "Cautious"),
+        ("B", "Water Specialist, WBG", "WBG – Execution/Sector", "Neutral"),
+        ("C", "Communication & Partnerships, WBG", "WBG – Execution", "Neutral"),
+        ("D", "Financial Advisory, WBG", "WBG – Financial/System", "Cautious"),
+        ("E", "Partnerships, IFC", "IFC – Execution", "Neutral"),
+        ("F", "Program Officer, Gates Foundation", "Foundation", "Cautious"),
+        ("G", "External Affairs, WBG", "WBG – Sovereign/System", "Neutral"),
+        ("H", "IDA Economist, WBG", "WBG – Analytical", "Neutral"),
+        ("I", "Social Development Specialist, WBG", "WBG – Execution/Sector", "Cautious"),
+    ]
+    sentiment_colors = {
+        "Neutral": COLORS["navy"],
+        "Cautious": COLORS["clay"],
+        "Optimistic": COLORS["green"],
+        "Critical": "#804e49",
+    }
+
+    rows_html = ""
+    for code, role, actor, sentiment in interviewee_rows:
+        sc = sentiment_colors.get(sentiment, COLORS["muted"])
+        bdr = COLORS["border"]
+        sub = COLORS["subtext"]
+        txt = COLORS["text"]
+        navy = COLORS["navy"]
+        rows_html += (
+                "<tr style='background:white'>"
+                "<td style='padding:0.5rem 1rem;font-weight:700;color:" + navy + ";font-size:0.9rem;border-bottom:1px solid " + bdr + "'>" + code + "</td>"
+                                                                                                                                                    "<td style='padding:0.5rem 1rem;font-size:0.85rem;color:" + txt + ";border-bottom:1px solid " + bdr + "'>" + role + "</td>"
+                                                                                                                                                                                                                                                                        "<td style='padding:0.5rem 1rem;font-size:0.82rem;color:" + sub + ";border-bottom:1px solid " + bdr + "'>" + actor + "</td>"
+                                                                                                                                                                                                                                                                                                                                                                                             "<td style='padding:0.5rem 1rem;border-bottom:1px solid " + bdr + "'>"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                               "<span style='background:" + sc + ";color:white;border-radius:20px;padding:2px 10px;font-size:0.75rem;font-weight:600'>" + sentiment + "</span></td>"
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  "</tr>"
+        )
+
+    bone = COLORS["bone"]
+    navy = COLORS["navy"]
+    bdr = COLORS["border"]
+    th_s = "padding:0.55rem 1rem;font-size:0.72rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:" + navy + ";text-align:left;border-bottom:2px solid " + bdr
+    st.markdown(
+        "<div style='overflow-x:auto;border-radius:16px;border:1px solid " + bdr + ";box-shadow:0 2px 10px rgba(10,18,42,0.04)'>"
+                                                                                   "<table style='width:100%;border-collapse:collapse;font-family:Inter,Arial,sans-serif'>"
+                                                                                   "<thead><tr style='background:" + bone + "'>"
+                                                                                                                            "<th style='" + th_s + "'>Code</th>"
+                                                                                                                                                   "<th style='" + th_s + "'>Role</th>"
+                                                                                                                                                                          "<th style='" + th_s + "'>Actor Type</th>"
+                                                                                                                                                                                                 "<th style='" + th_s + "'>Sentiment</th>"                                                                                                                                                                                                                 
+                                                                                                                                                                                                                                               "</tr></thead><tbody>" + rows_html + "</tbody></table></div>",
+        unsafe_allow_html=True,
+    )
+    st.caption("All views expressed are personal and do not represent any institution.")
+    st.divider()
+
+    # ── Tabs ──────────────────────────────────────────────────────────────────
+    tab1, tab2, tab3, tab4 = st.tabs([
+        "Theme Frequency", "Code by Interviewee", "Heatmap", "Key Quotes"
+    ])
+
+    # Accurate counts from raw coded transcript data (Role & Perspective excluded)
+    THEMES = [
+        "Capital Flow Constraints",
+        "Risk Types",
+        "Gaps in Toolkit",
+        "Instruments Effectiveness",
+        "Country Platforms & Coalitions",
+        "Data & Transparency",
+        "Fragmentation",
+        "Geopolitics / ODA Pressure",
+        "Philanthropy Engagement",
+        "Private Sector",
+        "Actor-Specific",
+        "Role of IDA",
+        "Solutions & Innovations",
+    ]
+    INTERVIEWEES = ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+
+    # Rows = themes, columns = interviewees A–I
+    COUNTS = {
+        "Capital Flow Constraints": [5, 11, 3, 8, 5, 13, 15, 12, 3],
+        "Risk Types": [1, 3, 5, 5, 0, 2, 3, 0, 8],
+        "Gaps in Toolkit": [2, 3, 4, 1, 3, 6, 1, 1, 3],
+        "Instruments Effectiveness": [7, 17, 12, 10, 12, 12, 13, 3, 8],
+        "Country Platforms & Coalitions": [0, 6, 4, 1, 1, 0, 1, 1, 0],
+        "Data & Transparency": [0, 4, 0, 0, 1, 3, 1, 0, 0],
+        "Fragmentation": [8, 4, 4, 2, 6, 5, 7, 4, 0],
+        "Geopolitics / ODA Pressure": [1, 1, 0, 0, 2, 1, 4, 3, 0],
+        "Philanthropy Engagement": [7, 4, 5, 1, 7, 2, 7, 0, 0],
+        "Private Sector": [3, 6, 4, 2, 3, 3, 4, 0, 1],
+        "Actor-Specific": [1, 1, 3, 1, 2, 3, 2, 3, 3],
+        "Role of IDA": [5, 1, 4, 2, 0, 2, 2, 0, 1],
+        "Solutions & Innovations": [1, 1, 1, 0, 0, 1, 0, 2, 0],
+    }
+
+    totals = {t: sum(COUNTS[t]) for t in THEMES}
+    n_coverage = {t: sum(1 for v in COUNTS[t] if v > 0) for t in THEMES}
+
+    # ── Tab 1: Theme frequency bar chart ─────────────────────────────────────
+    with tab1:
+        st.markdown("#### Total Coded Turns by Theme")
+        st.markdown(
+            "<p class='subtle-note'>Ranked by total frequency across all 9 interviews. "
+            "Colour reflects breadth of coverage (N interviewees applying code at least once).</p>",
+            unsafe_allow_html=True,
+        )
+        sorted_themes = sorted(THEMES, key=lambda t: totals[t])
+        bar_cols = [
+            COLORS["navy"] if n_coverage[t] >= 7 else
+            COLORS["green"] if n_coverage[t] >= 5 else
+            COLORS["clay"] if n_coverage[t] >= 3 else
+            COLORS["muted"]
+            for t in sorted_themes
+        ]
+        fig_bar = go.Figure()
+        fig_bar.add_trace(go.Bar(
+            y=sorted_themes,
+            x=[totals[t] for t in sorted_themes],
+            orientation="h",
+            marker_color=bar_cols,
+            marker_line_width=0,
+            text=[str(totals[t]) + " turns · " + str(n_coverage[t]) + "/9" for t in sorted_themes],
+            textposition="outside",
+            hovertemplate="<b>%{y}</b><br>Total: %{x} turns<extra></extra>",
+        ))
+        for label, col in [
+            ("Broad (7–9/9)", COLORS["navy"]),
+            ("Moderate (5–6/9)", COLORS["green"]),
+            ("Limited (3–4/9)", COLORS["clay"]),
+        ]:
+            fig_bar.add_trace(go.Scatter(
+                x=[None], y=[None], mode="markers",
+                marker=dict(size=10, color=col, symbol="square"),
+                name=label, showlegend=True,
+            ))
+        fig_bar.update_layout(
+            height=500,
+            xaxis_title="Total coded turns",
+            yaxis_title=None,
+            plot_bgcolor="white",
+            paper_bgcolor="white",
+            font=dict(family="Inter,Arial,sans-serif", color=COLORS["text"], size=12),
+            margin=dict(t=20, b=20, l=20, r=180),
+            xaxis=dict(gridcolor=COLORS["border"]),
+            yaxis=dict(showgrid=False),
+            legend=dict(orientation="v", x=1.02, y=1.0, xanchor="left", yanchor="top",
+                        font=dict(size=11), bgcolor="rgba(0,0,0,0)"),
+        )
+        st.plotly_chart(fig_bar, use_container_width=True)
+
+    # ── Tab 2: Stacked bar by interviewee (top 4 per person) ─────────────────
+    with tab2:
+        st.markdown("#### Code Distribution by Interviewee")
+        st.markdown(
+            "<p class='subtle-note'>Total coded turns per interviewee. "
+            "Top 4 themes per interviewee are highlighted individually — "
+            "all remaining themes grouped as Other.</p>",
+            unsafe_allow_html=True,
+        )
+
+        # Find top 4 themes per interviewee
+        top4_per_person = {}
+        for j, person in enumerate(INTERVIEWEES):
+            scores = {t: COUNTS[t][j] for t in THEMES}
+            ranked = sorted(scores, key=lambda t: scores[t], reverse=True)
+            top4_per_person[person] = [t for t in ranked if scores[t] > 0][:4]
+
+        all_top4 = []
+        for themes in top4_per_person.values():
+            for t in themes:
+                if t not in all_top4:
+                    all_top4.append(t)
+
+        top4_palette = [
+            COLORS["navy"], COLORS["green"], COLORS["clay"], "#8eb1d1",
+            "#c98f86", "#82c49b", "#b39ddb", "#f0a86e", "#4a9068", "#d4a96a",
+        ]
+        color_map = {t: top4_palette[i % len(top4_palette)] for i, t in enumerate(all_top4)}
+
+        fig_stack = go.Figure()
+        for theme in all_top4:
+            y_vals = [
+                COUNTS[theme][j] if theme in top4_per_person[p] else 0
+                for j, p in enumerate(INTERVIEWEES)
+            ]
+            fig_stack.add_trace(go.Bar(
+                name=theme, x=INTERVIEWEES, y=y_vals,
+                marker_color=color_map[theme], marker_line_width=0,
+            ))
+
+        other_vals = [
+            sum(COUNTS[t][j] for t in THEMES if t not in top4_per_person[p])
+            for j, p in enumerate(INTERVIEWEES)
+        ]
+        fig_stack.add_trace(go.Bar(
+            name="Other", x=INTERVIEWEES, y=other_vals,
+            marker_color=COLORS["muted"], marker_line_width=0,
+        ))
+
+        fig_stack.update_layout(
+            barmode="stack", height=420,
+            xaxis_title="Interviewee", yaxis_title="Coded turns",
+            plot_bgcolor="white", paper_bgcolor="white",
+            font=dict(family="Inter,Arial,sans-serif", color=COLORS["text"], size=12),
+            margin=dict(t=20, b=20, l=20, r=210),
+            xaxis=dict(showgrid=False),
+            yaxis=dict(gridcolor=COLORS["border"]),
+            legend=dict(orientation="v", x=1.02, y=1.0, xanchor="left", yanchor="top",
+                        font=dict(size=10), bgcolor="rgba(0,0,0,0)"),
+        )
+        st.plotly_chart(fig_stack, use_container_width=True)
+        st.caption("Colours show each interviewee's top 4 themes. Remaining themes grouped as Other (grey).")
+
+    # ── Tab 3: Heatmap ────────────────────────────────────────────────────────
+    with tab3:
+        st.markdown("#### Thematic Code Frequency Across Expert Interviews (N = 9)")
+        st.markdown(
+            "<p class='subtle-note'>Cell values = coded turns per interviewee. "
+            "Colour intensity reflects frequency.</p>",
+            unsafe_allow_html=True,
+        )
+
+        heatmap_z = [COUNTS[t] for t in THEMES]
+        heatmap_text = [[str(v) if v > 0 else "" for v in row] for row in heatmap_z]
+
+        fig_hm = go.Figure(go.Heatmap(
+            z=heatmap_z,
+            x=INTERVIEWEES,
+            y=THEMES,
+            text=heatmap_text,
+            texttemplate="%{text}",
+            textfont=dict(size=12, color=COLORS["text"]),
+            colorscale=[
+                [0.0, "#ffffff"],
+                [0.01, COLORS["bone"]],
+                [0.3, "#b8d0e8"],
+                [0.6, COLORS["soft_blue"]],
+                [1.0, COLORS["navy"]],
+            ],
+            zmin=0, zmax=17,
+            showscale=True,
+            colorbar=dict(
+                title=dict(text="Coded Turns", font=dict(size=11)),
+                tickfont=dict(size=10), thickness=14, len=0.8, outlinewidth=0,
+            ),
+            hovertemplate="<b>%{y}</b><br>Interviewee %{x}<br>Coded turns: %{z}<extra></extra>",
+            xgap=3, ygap=3,
+        ))
+        fig_hm.update_layout(
+            height=500,
+            plot_bgcolor="white", paper_bgcolor="white",
+            font=dict(family="Inter,Arial,sans-serif", color=COLORS["text"], size=12),
+            margin=dict(t=20, b=20, l=220, r=20),
+            xaxis=dict(title="Interviewee", showgrid=False, side="top"),
+            yaxis=dict(showgrid=False, autorange="reversed"),
+        )
+        st.plotly_chart(fig_hm, use_container_width=True)
+        st.caption("Dark blue = high frequency (10+ turns) · mid blue = moderate · white = not coded.")
+
+    # ── Tab 4: Key Quotes ─────────────────────────────────────────────────────
+    with tab4:
+        st.markdown("#### Selected Quotes by Theme")
+        st.markdown(
+            "<p class='subtle-note'>Representative coded excerpts grouped by theme. "
+            "Attributed by interviewee letter code only.</p>",
+            unsafe_allow_html=True,
+        )
+
+
+        def quote_card(letter, quote, memo, tc):
+            bdr = COLORS["border"]
+            txt = COLORS["text"]
+            sub = COLORS["subtext"]
+            memo_part = (" — " + memo) if memo else ""
+            st.markdown(
+                "<div style='background:white;border:1px solid " + bdr + ";"
+                                                                         "border-left:4px solid " + tc + ";border-radius:14px;"
+                                                                                                         "padding:0.85rem 1.1rem;margin-bottom:0.6rem;"
+                                                                                                         "box-shadow:0 1px 4px rgba(10,18,42,0.04)'>"
+                                                                                                         "<p style='margin:0 0 6px;font-size:0.83rem;font-style:italic;"
+                                                                                                         "color:" + txt + ";line-height:1.6'>\"" + quote + "\"</p>"
+                                                                                                                                                           "<p style='margin:0;font-size:0.75rem;color:" + sub + "'>"
+                                                                                                                                                                                                                 "<strong>Interviewee " + letter + "</strong>" + memo_part +
+                "</p></div>",
+                unsafe_allow_html=True,
+            )
+
+
+        themes_quotes = [
+            {
+                "label": "Instruments Effectiveness",
+                "color": COLORS["navy"],
+                "summary": "The breadth of IDA's toolkit was broadly acknowledged, but concerns centred on fragmented entry points, proof-of-concept gaps in blended structures, and shareholder complaints about accessibility.",
+                "quotes": [
+                    ("A",
+                     "The breadth and the breadth of the toolkit is there — but I've certainly heard complaints about it from shareholders.",
+                     "on toolkit range vs accessibility"),
+                    ("B", "The goal is to crowd in investments and financing from different stakeholders.",
+                     "on instrument design intent"),
+                    ("F", "They don't have faith in the ability of the quality of the pipeline.",
+                     "on IFC pipeline quality concerns"),
+                ],
+            },
+            {
+                "label": "Capital Flow Constraints",
+                "color": COLORS["clay"],
+                "summary": "The scale of philanthropic and private capital falls short of IDA's needs. Concerns centred on influence over policy frameworks, nervousness about non-sovereign actors, and structural barriers to pipeline access.",
+                "quotes": [
+                    ("A",
+                     "It all gets down to who will be able to develop, who will have influence over our policy framework.",
+                     "on philanthropic governance concerns"),
+                    ("C", "Unless the runway is set in, we're not going to be able to do anything.",
+                     "on pipeline pre-conditions"),
+                    ("G", "The pipeline is the real constraint — not the appetite.", "on private sector readiness"),
+                ],
+            },
+            {
+                "label": "Fragmentation",
+                "color": "#8eb1d1",
+                "summary": "System fragmentation — across actors, instruments, and incentive structures — was cited as a persistent structural barrier. Too many ineffective players and insufficient coordination mechanisms were recurring concerns.",
+                "quotes": [
+                    ("A", "Too many, too many players, too many ineffective players.", "on system fragmentation"),
+                    ("C",
+                     "The biggest issue is that the pipeline is not structured in a way that enables philanthropic and private sector partners to come in.",
+                     "on pipeline architecture"),
+                    ("E", "There's still levels of this that are missing between the sectors to connect the tissue.",
+                     "on inter-sectoral coordination"),
+                ],
+            },
+            {
+                "label": "Philanthropy Engagement",
+                "color": COLORS["green"],
+                "summary": "Sovereign donors exhibit varying levels of trust in philanthropic actors. Some are skeptical about the scale and motives of philanthropic capital; others see it as a complementary and growing channel.",
+                "quotes": [
+                    ("A",
+                     "There are donors that are far less trusting of philanthropies and their motives and the way they operate.",
+                     "on sovereign donor scepticism"),
+                    ("C", "Do philanthropies come in across the capital stack of the mission?",
+                     "on structural integration"),
+                    ("E", "Foundations like Hilton and CIFF are already operating in this space.",
+                     "on existing philanthropic engagement"),
+                ],
+            },
+            {
+                "label": "Risk Types",
+                "color": COLORS["clay"],
+                "summary": "Political, regulatory, and currency risks were identified as the primary deterrents to private sector engagement in IDA-eligible countries. Investors consistently overprice generalised risk due to information asymmetries.",
+                "quotes": [
+                    ("D",
+                     "Is there going to be strikes? There's a lot of uncertainties that come into low-income countries.",
+                     "on political and labour risk"),
+                    ("C",
+                     "The problem with development — the private sector is crucial, but minimising risk is essential.",
+                     "on blended finance design imperative"),
+                    ("I",
+                     "Investors often overprice uncertainty when they lack granular information, trusted local partners, or credible risk-mitigation tools.",
+                     "on information asymmetry"),
+                ],
+            },
+            {
+                "label": "Role of IDA",
+                "color": COLORS["green"],
+                "summary": "IDA is seen as uniquely positioned to coordinate across the capital stack and legitimise new donor categories — but must act while its financial credibility remains intact.",
+                "quotes": [
+                    ("A", "I think now is the time that IDA can legitimately speak to the financial efficiency.",
+                     "on IDA's window of opportunity"),
+                    ("C", "They join forces and identify areas where each can fit in — across the capital stack.",
+                     "on collaborative financing structures"),
+                    ("D",
+                     "All of IDA is depending on governments to see it as in their enlightened self-interest to keep donating concessional money.",
+                     "on structural dependency risk"),
+                ],
+            },
+            {
+                "label": "Geopolitics / ODA Pressure",
+                "color": COLORS["muted"],
+                "summary": "ODA peaked in 2023 and is now under pressure from right-wing political shifts, defence spending competition, and declining public trust in development effectiveness.",
+                "quotes": [
+                    ("G", "We have seen peak ODA in 2023 — above $220 billion roughly.", "on ODA trajectory"),
+                    ("B",
+                     "Global geopolitical changes are significantly affecting developing nations' ability to maintain development financing.",
+                     "on systemic pressures"),
+                    ("H", "The fiscal space for ODA is shrinking in most donor countries.",
+                     "on sovereign budget constraints"),
+                ],
+            },
+            {
+                "label": "Solutions & Innovations",
+                "color": COLORS["green"],
+                "summary": "Solutions ranged from tailored country-level engagement to global pooled de-risking vehicles. Adaptive programming and learning loops were emphasised as necessary for sustained impact.",
+                "quotes": [
+                    ("F", "What do we learn from this progress and how can we continue to adapt?",
+                     "on adaptive programming"),
+                    ("H", "It needs to be tailored at the end of the day. That's my main point.",
+                     "on country-specific approaches"),
+                    ("H",
+                     "A global fund to pool resources for de-risking private sector investments could unlock capital at scale.",
+                     "on proposed structural innovation"),
+                ],
+            },
+        ]
+
+        for theme in themes_quotes:
+            tc = theme["color"]
+            navy = COLORS["navy"]
+            sub = COLORS["subtext"]
+            st.markdown(
+                "<div style='margin:1.2rem 0 0.4rem;display:flex;align-items:center;gap:10px'>"
+                "<div style='width:4px;height:1.4rem;background:" + tc + ";border-radius:2px'></div>"
+                                                                         "<p style='margin:0;font-size:1rem;font-weight:700;color:" + navy + "'>" +
+                theme["label"] + "</p>"
+                                 "</div>",
+                unsafe_allow_html=True,
+            )
+            st.markdown(
+                "<p style='color:" + sub + ";font-size:0.88rem;margin:0 0 0.5rem;line-height:1.6'>"
+                + theme["summary"] + "</p>",
+                unsafe_allow_html=True,
+            )
+            for letter, quote, memo in theme["quotes"]:
+                quote_card(letter, quote, memo, tc)

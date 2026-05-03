@@ -5,24 +5,23 @@ Dependent variable: Stage 1 = donate_dummy | Stage 2 = log(donation_usd)
 Variable                                        Stage 1 (Probit)           Stage 2 (OLS+IMR)
                                              Coef.          (SE)         Coef.          (SE)
 --------------------------------------------------------------------------------------------
-Constant                                -4.2079***      (0.3597)    19.1363***      (0.4345)
+Constant                                -4.2079***      (0.3597)    16.9527***      (0.1673)
 Log GDP per capita                       0.1301***      (0.0326)                            
 DAC member                               1.9212***      (0.1373)                            
 UN voting alignment                      2.7550***      (0.3389)                            
 Trade openness (% GDP)                   0.0028***      (0.0007)                            
 Governance effectiveness                   -0.1096      (0.0864)                            
 Peer donor pressure                         0.2819      (0.1817)                            
-Log GDP (level)                                                      2.2415***      (0.1521)
-Fiscal balance (% GDP)                                               0.3421***      (0.0725)
-IDA vote share (lag)                                                 0.1691***      (0.0644)
-Trade exposure to IDA countries                                     -0.2237***      (0.0606)
-Log donation (prior round)                                           0.4231***      (0.1202)
-US/EU ally                                                          -2.1101***      (0.3785)
-Inverse Mills Ratio (λ)                                             -1.1095***      (0.1246)
+Log GDP (level)                                                      2.2847***      (0.1619)
+Fiscal balance (% GDP)                                               0.4310***      (0.0629)
+IDA vote share (lag)                                                  0.1340**      (0.0602)
+Trade exposure to IDA countries                                        -0.0546      (0.0634)
+Log donation (prior round)                                           0.5456***      (0.1445)
+Inverse Mills Ratio (λ)                                             -0.7982***      (0.1192)
 --------------------------------------------------------------------------------------------
 Observations                                  1479                         385
-Pseudo R² / R²                              0.5263                      0.9026
-Adj. R²                                                                 0.8964
+Pseudo R² / R²                              0.5263                      0.8806
+Adj. R²                                                                 0.8733
 Log-likelihood                             -401.75
 --------------------------------------------------------------------------------------------
 * p<0.10  ** p<0.05  *** p<0.01

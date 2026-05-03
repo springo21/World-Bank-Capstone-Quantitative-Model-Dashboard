@@ -5,18 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="92cb203b-1a01-4929-a369-225aa7ec9c14" name="Changes" comment="fix: variable consistency">
-      <change afterPath="$PROJECT_DIR$/data/raw/IdealPointDyads1946-2025.csv" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/.openspec.yaml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/design.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/proposal.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/specs/composite-dri-score/spec.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/specs/gap-confidence-intervals/spec.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/specs/giving-rate-normalization/spec.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/specs/peer-group-benchmark/spec.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/specs/ppp-gap-metrics/spec.md" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/openspec/changes/dri-model-improvements/tasks.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/processed/capacity_scores.csv" beforeDir="false" afterPath="$PROJECT_DIR$/data/processed/capacity_scores.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/charts/chart5_world_map.html" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/chart5_world_map.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/charts/heckman_residuals.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/heckman_residuals.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/charts/regression_table.png" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/charts/regression_table.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/dri_output.csv" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/dri_output.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/heckman_diagnostics.txt" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/heckman_diagnostics.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/regression_table.csv" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/regression_table.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/outputs/regression_table.txt" beforeDir="false" afterPath="$PROJECT_DIR$/outputs/regression_table.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/heckman.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/heckman.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -249,7 +248,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777050671277</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="fix: variable consistency">
+      <option name="closed" value="true" />
+      <created>1777299275818</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1777299275819</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="VcsManagerConfiguration">

@@ -61,7 +61,7 @@ PANEL_REQUIRED_COLUMNS = {
     "log_gdp_per_capita", "dac_member", "un_voting_align", "trade_openness",
     "gov_effectiveness", "peer_donor", "log_gdp_level", "fiscal_balance_pct_gdp",
     "ida_vote_share_lag", "trade_exposure_ida", "log_donation_lag",
-    "us_eu_ally",
+    #"us_eu_ally",
 # "sovereign_credit_rating",  # dropped: static hand-curated proxy, collinear with GDP/governance
 }
 
@@ -72,7 +72,7 @@ STAGE1_VARS = [
 
 STAGE2_VARS = [
     "log_gdp_level", "fiscal_balance_pct_gdp", "ida_vote_share_lag",
-    "trade_exposure_ida", "log_donation_lag", "us_eu_ally",
+    "trade_exposure_ida", "log_donation_lag", #"us_eu_ally",
     # "sovereign_credit_rating", #dropped
 ]
 
@@ -1120,14 +1120,14 @@ def score_capacity(master: pd.DataFrame | None = None) -> pd.DataFrame:
 
     # Pull in per-country metadata from the same lookup tables used in build_panel.py
     from build_panel import (
-        DAC_JOIN_YEAR, US_EU_ALLY, lookup_un_align,
+        DAC_JOIN_YEAR, lookup_un_align,
         IDA_VOTE_SHARE, TRADE_EXPOSURE_IDA,
-        #SOVEREIGN_RATING,
+        #SOVEREIGN_RATING, US_EU_ALLY,
     )
 
     iso = pred_input["iso3"]
     pred_input["dac_member"] = iso.map(lambda x: 1 if DAC_JOIN_YEAR.get(x, 9999) <= 2024 else 0)
-    pred_input["us_eu_ally"] = iso.map(lambda x: US_EU_ALLY.get(x, 0))
+    #pred_input["us_eu_ally"] = iso.map(lambda x: US_EU_ALLY.get(x, 0))
     pred_input["un_voting_align"] = iso.map(lambda x: lookup_un_align(x, 2024))
     pred_input["ida_vote_share_lag"] = iso.map(lambda x: IDA_VOTE_SHARE.get(x, 0.05))
     pred_input["trade_exposure_ida"] = iso.map(lambda x: TRADE_EXPOSURE_IDA.get(x, 0.15))

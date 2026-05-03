@@ -4,7 +4,7 @@ HECKMAN SELECTION MODEL — DIAGNOSTICS REPORT
 
 1. IMR Significance Test
 ----------------------------------------
-   IMR coefficient: -1.1095  p-value: 0.0000
+   IMR coefficient: -0.7982  p-value: 0.0000
    OK: IMR is statistically significant at 10% level
 
 2. Exclusion Restriction Strength (LR Test)
@@ -16,12 +16,11 @@ HECKMAN SELECTION MODEL — DIAGNOSTICS REPORT
 ----------------------------------------
    Variable                               Heckman  Naive OLS   % Change
    ----------------------------------------------------------------------
-   log_gdp_level                           2.2415     2.4717      -9.3%
-   fiscal_balance_pct_gdp                  0.3421     0.4059     -15.7%
-   ida_vote_share_lag                      0.1691     0.2736     -38.2%
-   trade_exposure_ida                     -0.2237    -0.4381     +48.9%
-   log_donation_lag                        0.4231     0.7467     -43.3%
-   us_eu_ally                             -2.1101    -0.8947    -135.8%
+   log_gdp_level                           2.2847     2.4609      -7.2%
+   fiscal_balance_pct_gdp                  0.4310     0.4418      -2.5%
+   ida_vote_share_lag                      0.1340     0.2410     -44.4%
+   trade_exposure_ida                     -0.0546    -0.3221     +83.0%
+   log_donation_lag                        0.5456     0.7627     -28.5%
 
 4. Heteroskedasticity (Breusch-Pagan)
 ----------------------------------------
@@ -30,36 +29,35 @@ HECKMAN SELECTION MODEL — DIAGNOSTICS REPORT
 
 5. Variance Inflation Factors (Stage 2)
 ----------------------------------------
-   log_gdp_level                       VIF=6.95
-   fiscal_balance_pct_gdp              VIF=1.22
-   ida_vote_share_lag                  VIF=5.05
-   trade_exposure_ida                  VIF=2.20
-   log_donation_lag                    VIF=2.66
-   us_eu_ally                          VIF=1.89
-   imr                                 VIF=2.42
-   round_IDA10                         VIF=4.49
-   round_IDA11                         VIF=4.81
-   round_IDA12                         VIF=4.77
-   round_IDA13                         VIF=5.12
-   round_IDA14                         VIF=5.45
-   round_IDA15                         VIF=6.06
-   round_IDA16                         VIF=6.11
-   round_IDA17                         VIF=6.08
-   round_IDA2                          VIF=2.68
-   round_IDA3                          VIF=2.72
-   round_IDA4                          VIF=2.85
-   round_IDA5                          VIF=3.20
-   round_IDA6                          VIF=3.66
-   round_IDA7                          VIF=3.96
-   round_IDA8                          VIF=3.96
-   round_IDA9                          VIF=4.11
+   log_gdp_level                       VIF=6.94
+   fiscal_balance_pct_gdp              VIF=1.20
+   ida_vote_share_lag                  VIF=5.03
+   trade_exposure_ida                  VIF=1.91
+   log_donation_lag                    VIF=2.58
+   imr                                 VIF=2.03
+   round_IDA10                         VIF=4.46
+   round_IDA11                         VIF=4.78
+   round_IDA12                         VIF=4.74
+   round_IDA13                         VIF=5.08
+   round_IDA14                         VIF=5.40
+   round_IDA15                         VIF=6.00
+   round_IDA16                         VIF=6.08
+   round_IDA17                         VIF=6.06
+   round_IDA2                          VIF=2.66
+   round_IDA3                          VIF=2.69
+   round_IDA4                          VIF=2.83
+   round_IDA5                          VIF=3.19
+   round_IDA6                          VIF=3.64
+   round_IDA7                          VIF=3.92
+   round_IDA8                          VIF=3.93
+   round_IDA9                          VIF=4.07
 
 6. Out-of-Sample Accuracy (IDA18–IDA20 holdout)
 ----------------------------------------
    Model                       MAE       RMSE
    ---------------------------------------------
-   Heckman                  1.4128     1.7248
-   Naive OLS                1.9486     2.1492
+   Heckman                  1.6051     1.8872
+   Naive OLS                1.9630     2.1660
    (OOS sample: 94 donor observations)
 
 ======================================================================
