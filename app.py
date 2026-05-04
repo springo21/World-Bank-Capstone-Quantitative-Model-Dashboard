@@ -1715,7 +1715,7 @@ elif page == "Glossary":
         ("High-Potential Prospect", "#4a9068",
          "Non-donor with P(Donate) ≥ 0.50 from Stage 1 probit."),
         ("Emerging Prospect", COLORS["bone"],
-         "Non-donor with 0.20 ≤ P(Donate) < 0.50."),
+         "Non-donor with 0.50 > P(Donate) ≥ 0.20."),
         ("Low Probability", COLORS["muted"],
          "Non-donor with P(Donate) < 0.20."),
     ]
